@@ -60,7 +60,6 @@ export default function Map() {
             const routeInfo = routes.find((r) => {
               return r.route_id === vehicle.vehicle?.trip?.routeId;
             });
-            console.log("routes:", routeInfo);
             return (
               <Marker
                 key={vehicle.id}
@@ -75,7 +74,8 @@ export default function Map() {
                     <h3 className="font-bold mb-1">バス ID: {vehicle.id}</h3>
                     <p>
                       路線:
-                      {routeInfo?.route_short_name || "不明"}
+                      {`${routeInfo?.route_short_name}${routeInfo?.route_long_name}` ||
+                        "不明"}
                     </p>
                     {vehicle.vehicle.position.speed !== undefined && (
                       <p>
