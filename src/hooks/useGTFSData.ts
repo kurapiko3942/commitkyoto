@@ -90,6 +90,7 @@ export function useGTFSData() {
   console.log(staticData);
   return {
     routes: staticData.routes,
+    stops: staticData.stops,  // これを追加
     vehicles,
     loading,
     error,
