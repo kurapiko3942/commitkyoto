@@ -5,23 +5,20 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { Icon } from "leaflet";
 import { useGTFSData } from "@/hooks/useGTFSData";
 import SideBar from "@/components/layouts/Bar";
+import { GTFSStop, MAP_ICONS } from "@/types/gtfsTypes";
 // 京都市の中心座標
 const KYOTO_CENTER = { lat: 35.0116, lng: 135.7681 };
 
-// デフォルトのマーカーアイコンを使用
-const defaultIcon = new Icon({
-  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
+// バスのマーカーアイコンを設定
+const busIcon = new Icon({
+    iconUrl: "/bus-icon.svg",  // publicフォルダ内のbus-icon.svg
+    iconSize: [32, 32],  // SVGのサイズに合わせて調整
+    iconAnchor: [16, 16],  // アイコンの中心を基準点に
+    popupAnchor: [0, -16]  // ポップアップの位置を調整
+  });
 
 export default function Map() {
-  const { routes, vehicles, loading, error } = useGTFSData();
+  const { routes, stops, vehicles, loading, error } = useGTFSData();
 
   useEffect(() => {}, [vehicles]);
 
@@ -53,6 +50,21 @@ export default function Map() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        {/* バス停のマーカー */}
+        {stops && stops.map((stop: GTFSStop) => (  // 明示的な型付け
+      <Marker
+        key={stop.stop_id}
+        position={[stop.stop_lat, stop.stop_lon]}
+        icon={MAP_ICONS.stopIcon}
+      >
+        <Popup>
+          <div className="text-sm">
+            <h3 className="font-bold mb-1">バス停: {stop.stop_name}</h3>
+            <p>ID: {stop.stop_id}</p>
+          </div>
+        </Popup>
+      </Marker>
+    ))}
         {vehicles &&
           vehicles.map((vehicle) => {
             if (!vehicle.vehicle?.position) return null;
@@ -67,7 +79,7 @@ export default function Map() {
                   vehicle.vehicle.position.latitude,
                   vehicle.vehicle.position.longitude,
                 ]}
-                icon={defaultIcon}
+                icon={busIcon}
               >
                 <Popup>
                   <div className="text-sm">

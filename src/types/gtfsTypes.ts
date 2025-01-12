@@ -1,4 +1,5 @@
 // GTFS Realtime のエンティティ型定義
+import { Icon, IconOptions } from 'leaflet';
 
 export interface GTFSRealtimeVehicle {
   id: string;
@@ -41,10 +42,13 @@ export interface GTFSRoute {
   route_type: number;
 }
 export interface GTFSStop {
-  stop_id: string;
-  stop_name: string;
-  stop_lat: number;
-  stop_lon: number;
+    stop_id: string;
+    stop_name: string;
+    stop_lat: number;
+    stop_lon: number;
+    location_type?: number;
+    parent_station?: string;
+    wheelchair_boarding?: number;
 }
 export interface GTFSTrip {
   route_id: string;
@@ -63,3 +67,25 @@ export interface GTFSRealtimeResponse {
   };
   entity: GTFSRealtimeVehicle[];
 }
+
+// マーカーアイコンの設定用interface
+export interface GTFSMapIcons {
+    busIcon: Icon;
+    stopIcon: Icon;
+  }
+  
+  // アイコン設定のための定数
+  export const MAP_ICONS: GTFSMapIcons = {
+    busIcon: new Icon({
+      iconUrl: "/bus-icon.svg",
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+      popupAnchor: [0, -16]
+    }),
+    stopIcon: new Icon({
+      iconUrl: "/bus-stop.svg",
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+      popupAnchor: [0, -12]
+    })
+  };
