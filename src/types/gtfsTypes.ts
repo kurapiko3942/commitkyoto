@@ -32,7 +32,6 @@ export interface GTFSRealtimeVehicle {
     occupancy_status?: string;
   };
 }
-
 // 静的GTFS データの型定義
 export interface GTFSRoute {
   route_id: string;
@@ -41,14 +40,12 @@ export interface GTFSRoute {
   route_long_name: string;
   route_type: number;
 }
-
 export interface GTFSStop {
   stop_id: string;
   stop_name: string;
   stop_lat: number;
   stop_lon: number;
 }
-
 export interface GTFSTrip {
   route_id: string;
   service_id: string;
