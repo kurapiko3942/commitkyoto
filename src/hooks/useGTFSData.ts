@@ -1,7 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { GTFSRoute, GTFSStop, GTFSTrip, GTFSRealtimeResponse } from '@/types/gtfsTypes';
+import { useState, useEffect } from "react";
+import {
+  GTFSRoute,
+  GTFSStop,
+  GTFSTrip,
+  GTFSRealtimeResponse,
+} from "@/types/gtfsTypes";
 
 export function useGTFSData() {
   const [staticData, setStaticData] = useState<{
@@ -11,10 +16,10 @@ export function useGTFSData() {
   }>({
     routes: [],
     stops: [],
-    trips: []
+    trips: [],
   });
-  
-  const [vehicles, setVehicles] = useState<GTFSRealtimeResponse['entity']>([]);
+
+  const [vehicles, setVehicles] = useState<GTFSRealtimeResponse["entity"]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -22,20 +27,22 @@ export function useGTFSData() {
   useEffect(() => {
     const fetchStatic = async () => {
       try {
-        const response = await fetch('/api/gtfs');
+        const response = await fetch("/api/gtfs");
         if (!response.ok) {
           const errorText = await response.text();
-          throw new Error(`Failed to fetch static data: ${response.status} ${errorText}`);
+          throw new Error(
+            `Failed to fetch static data: ${response.status} ${errorText}`
+          );
         }
         const data = await response.json();
-        console.log('Static GTFS data:', data);
+
         setStaticData(data);
       } catch (err) {
-        console.error('Static data fetch error:', err);
-        setError(err instanceof Error ? err : new Error('Unknown error'));
+        console.error("Static data fetch error:", err);
+        setError(err instanceof Error ? err : new Error("Unknown error"));
       }
     };
-    
+
     fetchStatic();
   }, []);
 
@@ -43,31 +50,31 @@ export function useGTFSData() {
   useEffect(() => {
     const fetchRealtime = async () => {
       try {
-        console.log('Fetching realtime data...');
-        const response = await fetch('/api/gtfs/realtime');
-        
+        const response = await fetch("/api/gtfs/realtime");
+
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('Realtime API Error:', {
+          console.error("Realtime API Error:", {
             status: response.status,
             statusText: response.statusText,
-            body: errorText
+            body: errorText,
           });
-          throw new Error(`Failed to fetch realtime data: ${response.status} ${errorText}`);
+          throw new Error(
+            `Failed to fetch realtime data: ${response.status} ${errorText}`
+          );
         }
-        
+
         const data = await response.json();
-        console.log('Realtime GTFS data:', data);
-        
+
         if (data.entity) {
           setVehicles(data.entity);
         } else {
-          console.warn('No entity array in realtime data:', data);
+          console.warn("No entity array in realtime data:", data);
         }
         setLoading(false);
       } catch (err) {
-        console.error('Realtime data fetch error:', err);
-        setError(err instanceof Error ? err : new Error('Unknown error'));
+        console.error("Realtime data fetch error:", err);
+        setError(err instanceof Error ? err : new Error("Unknown error"));
         setLoading(false);
       }
     };
@@ -80,11 +87,11 @@ export function useGTFSData() {
 
     return () => clearInterval(interval);
   }, []);
-
+  console.log(staticData);
   return {
-    ...staticData,
+    routes: staticData.routes,
     vehicles,
     loading,
-    error
+    error,
   };
 }
