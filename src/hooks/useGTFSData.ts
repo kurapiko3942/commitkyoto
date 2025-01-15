@@ -35,7 +35,7 @@ export function useGTFSData() {
           );
         }
         const data = await response.json();
-
+        console.log('GTFS Static Data:', data); // データ確認用
         setStaticData(data);
       } catch (err) {
         console.error("Static data fetch error:", err);
