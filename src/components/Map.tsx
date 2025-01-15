@@ -20,6 +20,20 @@ const busIcon = new Icon({
   popupAnchor: [0, -16]
 });
 
+const userLocationIcon = new Icon({
+    iconUrl: "/user_location.svg",
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+    popupAnchor: [0, -20],
+    className: 'animate-pulse opacity-90'
+  });
+
+interface UserLocation {
+  position: LatLngTuple;
+  accuracy: number;
+  heading: number | null;
+}
+
 interface TouristLandmark {
   id: string;
   name: string;
@@ -32,14 +46,14 @@ interface PlaceDetails {
   id: string;
   name: string;
   nameEn: string;
-  photoUrls: string[];  // 複数の写真URL
-  iconUrl: string;      // アイコン用の写真URL
+  photoUrls: string[];
+  iconUrl: string;
   photoUrl: string;
   rating: number;
   userRatingsTotal: number;
   address: string;
   openingHours: string[];
-  currentPopularity?: number;  // 追加
+  currentPopularity?: number;
 }
 
 // 観光地の基本情報
@@ -85,6 +99,7 @@ export default function Map() {
   const { routes, stops, vehicles, loading, error } = useGTFSData();
   const [placeDetails, setPlaceDetails] = useState<Record<string, PlaceDetails>>({});
   const [landmarkIcons, setLandmarkIcons] = useState<Record<string, Icon>>({});
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
 
   // 観光地の写真とアイコンを生成する関数
   const createLandmarkIcon = (iconUrl: string) => {
@@ -96,6 +111,37 @@ export default function Map() {
       className: 'rounded-full border-2 border-white shadow-lg hover:border-blue-500 transition-all'
     });
   };
+
+  // 位置情報の取得
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      console.log('Geolocation is not supported');
+      return;
+    }
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const newLocation: UserLocation = {
+          position: [position.coords.latitude, position.coords.longitude],
+          accuracy: position.coords.accuracy,
+          heading: position.coords.heading
+        };
+        setUserLocation(newLocation);
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, []);
 
   // 観光地の詳細情報を取得
   useEffect(() => {
@@ -155,92 +201,109 @@ export default function Map() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
+        {/* 現在位置のマーカー */}
+        {userLocation && (
+  <Marker
+    position={userLocation.position}
+    icon={userLocationIcon}
+  >
+    <Popup>
+      <div className="text-sm">
+        <h3 className="font-bold mb-1">現在地</h3>
+        <p className="text-gray-600">精度: {Math.round(userLocation.accuracy)}m</p>
+        {userLocation.heading !== null && (
+          <p className="text-gray-600">
+            方角: {Math.round(userLocation.heading)}°
+          </p>
+        )}
+      </div>
+    </Popup>
+  </Marker>
+)}
+        
         {/* 観光地のマーカー */}
         {TOURIST_LANDMARKS.map((landmark) => {
- const details = placeDetails[landmark.id];
- const icon = details?.iconUrl ? 
-   createLandmarkIcon(details.iconUrl) : 
-   createLandmarkIcon('/landmark-default.svg');
+          const details = placeDetails[landmark.id];
+          const icon = details?.iconUrl ? 
+            createLandmarkIcon(details.iconUrl) : 
+            createLandmarkIcon('/landmark-default.svg');
 
- // 混雑度を表示するヘルパー関数
- const getCrowdLevel = (popularity: number | undefined) => {
-   if (popularity === undefined) return "データなし";
-   if (popularity < 30) return "空いています";
-   if (popularity < 60) return "やや混雑";
-   if (popularity < 85) return "混雑";
-   return "大変混雑";
- };
+          const getCrowdLevel = (popularity: number | undefined) => {
+            if (popularity === undefined) return "データなし";
+            if (popularity < 30) return "空いています";
+            if (popularity < 60) return "やや混雑";
+            if (popularity < 85) return "混雑";
+            return "大変混雑";
+          };
 
- // 混雑度に応じた色を返すヘルパー関数
- const getCrowdLevelColor = (popularity: number | undefined) => {
-   if (popularity === undefined) return "text-gray-500";
-   if (popularity < 30) return "text-green-600";
-   if (popularity < 60) return "text-yellow-600";
-   if (popularity < 85) return "text-orange-600";
-   return "text-red-600";
- };
+          const getCrowdLevelColor = (popularity: number | undefined) => {
+            if (popularity === undefined) return "text-gray-500";
+            if (popularity < 30) return "text-green-600";
+            if (popularity < 60) return "text-yellow-600";
+            if (popularity < 85) return "text-orange-600";
+            return "text-red-600";
+          };
 
- return (
-   <Marker
-     key={landmark.id}
-     position={landmark.position}
-     icon={icon}
-   >
-     <Popup>
-       <div className="text-sm max-w-xs">
-         <h3 className="font-bold text-lg mb-1">{details?.name || landmark.name}</h3>
-         <p className="text-gray-600 mb-2">{details?.nameEn || landmark.nameEn}</p>
-         
-         {/* 混雑度の表示を追加 */}
-         {details?.currentPopularity !== undefined && (
-           <p className={`mb-2 ${getCrowdLevelColor(details.currentPopularity)}`}>
-             <span className="font-semibold">混雑状況: </span>
-             {getCrowdLevel(details.currentPopularity)}
-             <span className="text-sm ml-1">
-               ({details.currentPopularity}%)
-             </span>
-           </p>
-         )}
-         
-         {details?.photoUrls && (
-           <PhotoSlider 
-             photos={details.photoUrls}
-             placeName={details.name}
-           />
-         )}
-         
-         {details?.rating && (
-           <div className="flex items-center mb-2">
-             <span className="text-yellow-500">★</span>
-             <span className="ml-1">{details.rating}</span>
-             <span className="text-gray-500 ml-2">
-               ({details.userRatingsTotal} reviews)
-             </span>
-           </div>
-         )}
-         
-         {details?.address && (
-           <div className="text-gray-600 mb-2">
-             <div className="font-semibold">住所:</div>
-             <div>{details.address}</div>
-           </div>
-         )}
+          return (
+            <Marker
+              key={landmark.id}
+              position={landmark.position}
+              icon={icon}
+            >
+              <Popup>
+                <div className="text-sm max-w-xs">
+                  <h3 className="font-bold text-lg mb-1">{details?.name || landmark.name}</h3>
+                  <p className="text-gray-600 mb-2">{details?.nameEn || landmark.nameEn}</p>
+                  
+                  {details?.currentPopularity !== undefined && (
+                    <p className={`mb-2 ${getCrowdLevelColor(details.currentPopularity)}`}>
+                      <span className="font-semibold">混雑状況: </span>
+                      {getCrowdLevel(details.currentPopularity)}
+                      <span className="text-sm ml-1">
+                        ({details.currentPopularity}%)
+                      </span>
+                    </p>
+                  )}
+                  
+                  {details?.photoUrls && (
+                    <PhotoSlider 
+                      photos={details.photoUrls}
+                      placeName={details.name}
+                    />
+                  )}
+                  
+                  {details?.rating && (
+                    <div className="flex items-center mb-2">
+                      <span className="text-yellow-500">★</span>
+                      <span className="ml-1">{details.rating}</span>
+                      <span className="text-gray-500 ml-2">
+                        ({details.userRatingsTotal} reviews)
+                      </span>
+                    </div>
+                  )}
+                  
+                  {details?.address && (
+                    <div className="text-gray-600 mb-2">
+                      <div className="font-semibold">住所:</div>
+                      <div>{details.address}</div>
+                    </div>
+                  )}
 
-         {details?.openingHours && details.openingHours.length > 0 && (
-           <div className="text-gray-600">
-             <div className="font-semibold">営業時間:</div>
-             <div className="text-xs">
-               {details.openingHours.map((hours, index) => (
-                 <div key={index}>{hours}</div>
-               ))}
-             </div>
-           </div>
-         )}
-       </div>
-     </Popup>
-   </Marker>
- );
-})}
+                  {details?.openingHours && details.openingHours.length > 0 && (
+                    <div className="text-gray-600">
+                      <div className="font-semibold">営業時間:</div>
+                      <div className="text-xs">
+                        {details.openingHours.map((hours, index) => (
+                          <div key={index}>{hours}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
 
         {/* バス停のマーカー */}
         {stops && stops.map((stop: GTFSStop) => (
@@ -259,60 +322,53 @@ export default function Map() {
         ))}
 
         {/* バスの現在位置マーカー */}
-        // バスの現在位置マーカーの部分を修正
-        {vehicles &&
-  vehicles.map((vehicle) => {
-    if (!vehicle.vehicle?.position) return null;
+        {vehicles && vehicles.map((vehicle) => {
+          if (!vehicle.vehicle?.position) return null;
 
-    const routeId = vehicle.vehicle?.trip?.routeId;
-    const routeInfo = routes.find((r) => {
-        return r.route_id === vehicle.vehicle?.trip?.routeId;
-      });
-    // デバッグログを追加
-    console.log('Current RouteId:', routeId);
-    console.log('All Routes:', routes);
-    console.log('Found RouteInfo:', routeInfo);
-    
-    const position: LatLngTuple = [
-      vehicle.vehicle.position.latitude,
-      vehicle.vehicle.position.longitude
-    ];
-    // デバッグ用
-    console.log('RouteInfo for', routeId, ':', routeInfo);
-    return (
-      <Marker
-        key={vehicle.id}
-        position={position}
-        icon={busIcon}
-      >
-        <Popup>
-          <div className="text-sm">
-          <h3 className="font-bold mb-1">バス ID: {vehicle.id}</h3>
-          <p>
-                      路線:
-                      {`${routeInfo?.route_short_name}${routeInfo?.route_long_name}` ||
-                        "不明"}
+          const routeId = vehicle.vehicle?.trip?.routeId;
+          const routeInfo = routes.find((r) => {
+            return r.route_id === vehicle.vehicle?.trip?.routeId;
+          });
+          
+          const position: LatLngTuple = [
+            vehicle.vehicle.position.latitude,
+            vehicle.vehicle.position.longitude
+          ];
+
+          return (
+            <Marker
+              key={vehicle.id}
+              position={position}
+              icon={busIcon}
+            >
+              <Popup>
+                <div className="text-sm">
+                  <h3 className="font-bold mb-1">バス ID: {vehicle.id}</h3>
+                  <p>
+                    路線:
+                    {`${routeInfo?.route_short_name}${routeInfo?.route_long_name}` ||
+                      "不明"}
+                  </p>
+                  <p className={`mb-1 ${getOccupancyStatusColor(vehicle.vehicle?.occupancyStatus || "")}`}>
+                    混雑度: {getOccupancyStatusText(vehicle.vehicle?.occupancyStatus || "")}
+                  </p>
+                  {vehicle.vehicle.position.speed !== undefined && (
+                    <p className="mb-1">
+                      速度: {Math.round(vehicle.vehicle.position.speed)} m/s
                     </p>
-            <p className={`mb-1 ${getOccupancyStatusColor(vehicle.vehicle?.occupancyStatus || "")}`}>
-  混雑度: {getOccupancyStatusText(vehicle.vehicle?.occupancyStatus || "")}
-</p>
-            {vehicle.vehicle.position.speed !== undefined && (
-              <p className="mb-1">
-                速度: {Math.round(vehicle.vehicle.position.speed)} m/s
-              </p>
-            )}
-            {vehicle.vehicle.timestamp && (
-              <p>
-                更新: {new Date(
-                  parseInt(vehicle.vehicle.timestamp) * 1000
-                ).toLocaleString("ja-JP")}
-              </p>
-            )}
-          </div>
-        </Popup>
-      </Marker>
-    );
-  })}
+                  )}
+                  {vehicle.vehicle.timestamp && (
+                    <p>
+                      更新: {new Date(
+                        parseInt(vehicle.vehicle.timestamp) * 1000
+                      ).toLocaleString("ja-JP")}
+                    </p>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );

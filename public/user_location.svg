@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- 外側の半透明の青い円 -->
+  <circle cx="12" cy="12" r="10" fill="#4285f4" opacity="0.2"/>
+  
+  <!-- 方向を示す矢印 -->
+  <path d="M12 2 L16 12 L12 10 L8 12 Z" fill="#4285f4"/>
+  
+  <!-- 中央の濃い青い円 -->
+  <circle cx="12" cy="12" r="3" fill="#4285f4"/>
+  
+  <!-- 中心の白い点 -->
+  <circle cx="12" cy="12" r="1.5" fill="white"/>
+</svg>
