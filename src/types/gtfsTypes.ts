@@ -30,7 +30,7 @@ export interface GTFSRealtimeVehicle {
       label?: string;
       license_plate?: string;
     };
-    occupancy_status?: string;
+    occupancyStatus?: string;  // この行を追加
   };
 }
 // 静的GTFS データの型定義
