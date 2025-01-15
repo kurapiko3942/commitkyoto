@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { Icon, LatLngTuple } from "leaflet";
 import { useGTFSData } from "@/hooks/useGTFSData";
-import SideBar from "@/components/layouts/Bar";
+import SideBar from "@/components/layouts/SideBar";
 import { GTFSStop, MAP_ICONS } from "@/types/gtfsTypes";
 import { PhotoSlider } from "./PhotoSlider";
 import { getOccupancyStatusColor, getOccupancyStatusText } from "@/utils/occupancyStatus";
