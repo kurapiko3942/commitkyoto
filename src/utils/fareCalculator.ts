@@ -2,7 +2,7 @@
 import { GTFSFareAttribute, GTFSFareRule } from '../types/gtfsTypes';
 
 export const calculateFare = (
-  routeId: string,
+  routeId: number,
   fareAttributes: GTFSFareAttribute[],
   fareRules: GTFSFareRule[]
 ): number => {

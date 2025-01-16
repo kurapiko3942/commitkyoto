@@ -114,12 +114,13 @@ export default function Map() {
   };
 
   // 位置情報の取得
-  useEffect(() => {
+  // Map.tsxのuseEffect内を修正
+useEffect(() => {
     if (!navigator.geolocation) {
       console.log('Geolocation is not supported');
       return;
     }
-
+  
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
         const newLocation: UserLocation = {
@@ -129,8 +130,18 @@ export default function Map() {
         };
         setUserLocation(newLocation);
       },
-      (error) => {
-        console.error('Error getting location:', error);
+      (err: GeolocationPositionError) => {  // 型を明示的に指定
+        // より具体的なエラーメッセージを提供
+        const errorMessage = {
+          1: "位置情報の使用が許可されていません",
+          2: "位置情報を取得できません",
+          3: "位置情報の取得がタイムアウトしました"
+        }[err.code] || "位置情報の取得に失敗しました";
+        
+        // 開発時のみログを出力
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`Geolocation error: ${errorMessage}`);
+        }
       },
       {
         enableHighAccuracy: true,
@@ -138,7 +149,7 @@ export default function Map() {
         maximumAge: 0
       }
     );
-
+  
     return () => {
       navigator.geolocation.clearWatch(watchId);
     };
