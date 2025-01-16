@@ -36,7 +36,7 @@ export interface GTFSRealtimeVehicle {
 }
 // 静的GTFS データの型定義
 export interface GTFSRoute {
-  route_id: string;
+  route_id: number;
   agency_id: string;
   route_short_name: string;
   route_long_name: string;
