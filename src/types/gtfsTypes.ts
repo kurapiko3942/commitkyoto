@@ -1,4 +1,5 @@
 // GTFS Realtime のエンティティ型定義
+//gtfsTypes.ts
 import { Icon, IconOptions } from 'leaflet';
 
 export interface GTFSRealtimeVehicle {
@@ -89,3 +90,26 @@ export interface GTFSMapIcons {
       popupAnchor: [0, -12]
     })
   };
+
+  export interface GTFSStopTime {
+    trip_id: string;
+    arrival_time: string;
+    departure_time: string;
+    stop_id: string;
+    stop_sequence: number;
+  }
+  
+  export interface GTFSFareAttribute {
+    fare_id: string;
+    price: number;
+    currency_type: string;
+    payment_method: number;
+    transfers: number;
+  }
+  
+  export interface GTFSFareRule {
+    fare_id: string;
+    route_id: string;
+    origin_id?: string;
+    destination_id?: string;
+  }

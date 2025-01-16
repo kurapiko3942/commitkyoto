@@ -1,4 +1,5 @@
-// components/layouts/Bar.tsx
+"use client";
+
 import {
   Sheet,
   SheetContent,
@@ -6,17 +7,16 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
- } from "@/components/ui/sheet";
- import { Button } from "@/components/ui/button";
- import { useState } from "react";
- import { useGTFSData } from "@/hooks/useGTFSData";
- import { GTFSRealtimeVehicle, GTFSRoute, GTFSStop } from "@/types/gtfsTypes";
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useGTFSData } from "@/hooks/useGTFSData";
+import { GTFSRealtimeVehicle, GTFSRoute, GTFSStop } from "@/types/gtfsTypes";
 import { RouteResult } from "./routeResult";
 import { useRoute } from "@/context/routeContext";
 
- 
- // 観光地の一覧
- const TOURIST_SPOTS = [
+// 観光地の一覧
+const TOURIST_SPOTS = [
   {
     id: "kinkakuji",
     name: "金閣寺",
@@ -42,20 +42,21 @@ import { useRoute } from "@/context/routeContext";
     name: "京都駅",
     position: [34.9858, 135.7588] as [number, number]
   }
- ];
- 
- interface TouristSpot {
+];
+
+interface TouristSpot {
   id: string;
   name: string;
   position: [number, number];
- }
- 
- export default function SideBar() {
-  const { routes, stops, vehicles } = useGTFSData();
+}
+
+export default function SideBar() {
+  const { routes, stops, vehicles, fareAttributes, fareRules } = useGTFSData();
   const [fromSpot, setFromSpot] = useState<TouristSpot | null>(null);
   const [toSpot, setToSpot] = useState<TouristSpot | null>(null);
+  const [sortBy, setSortBy] = useState<'time' | 'fare' | 'transfers'>('time');
   const { selectedRoute, setSelectedRoute } = useRoute();
- 
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -109,7 +110,7 @@ import { useRoute } from "@/context/routeContext";
                 ))}
               </select>
             </div>
- 
+
             {/* 目的地選択 */}
             <div className="bg-neutral-800 p-4 rounded-lg">
               <label className="block text-white mb-2">目的地</label>
@@ -129,7 +130,21 @@ import { useRoute } from "@/context/routeContext";
                 ))}
               </select>
             </div>
- 
+
+            {/* ソート選択 */}
+            <div className="bg-neutral-800 p-4 rounded-lg">
+              <label className="block text-white mb-2">ルートの並び替え</label>
+              <select
+                className="w-full bg-neutral-700 text-white p-2 rounded"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'time' | 'fare' | 'transfers')}
+              >
+                <option value="time">所要時間が短い順</option>
+                <option value="fare">運賃が安い順</option>
+                <option value="transfers">乗換回数が少ない順</option>
+              </select>
+            </div>
+
             {/* ルート検索結果 */}
             {fromSpot && toSpot && (
               <RouteResult
@@ -138,11 +153,13 @@ import { useRoute } from "@/context/routeContext";
                 stops={stops}
                 vehicles={vehicles}
                 routes={routes}
-              />
+                fareAttributes={fareAttributes}
+                fareRules={fareRules}
+                sortBy={sortBy} stopTimes={[]}              />
             )}
           </SheetDescription>
         </SheetHeader>
       </SheetContent>
     </Sheet>
   );
- }
+}
