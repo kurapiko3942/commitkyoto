@@ -8,6 +8,7 @@ import SideBar from "@/components/layouts/SideBar";
 import { GTFSStop, MAP_ICONS } from "@/types/gtfsTypes";
 import { PhotoSlider } from "./PhotoSlider";
 import { getOccupancyStatusColor, getOccupancyStatusText } from "@/utils/occupancyStatus";
+import { BusStopPopup } from "./BusStopPopup";
 
 // 京都市の中心座標
 const KYOTO_CENTER: LatLngTuple = [35.0116, 135.7681];
@@ -96,7 +97,7 @@ const TOURIST_LANDMARKS: TouristLandmark[] = [
 ];
 
 export default function Map() {
-  const { routes, stops, vehicles, loading, error } = useGTFSData();
+  const { routes, stops, vehicles, stopTimes, loading, error } = useGTFSData();
   const [placeDetails, setPlaceDetails] = useState<Record<string, PlaceDetails>>({});
   const [landmarkIcons, setLandmarkIcons] = useState<Record<string, Icon>>({});
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -306,20 +307,21 @@ export default function Map() {
         })}
 
         {/* バス停のマーカー */}
-        {stops && stops.map((stop: GTFSStop) => (
-          <Marker
-            key={stop.stop_id}
-            position={[stop.stop_lat, stop.stop_lon] as LatLngTuple}
-            icon={MAP_ICONS.stopIcon}
-          >
-            <Popup>
-              <div className="text-sm">
-                <h3 className="font-bold mb-1">バス停: {stop.stop_name}</h3>
-                <p>ID: {stop.stop_id}</p>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+{stops && stops.map((stop: GTFSStop) => (
+  <Marker
+    key={stop.stop_id}
+    position={[stop.stop_lat, stop.stop_lon] as LatLngTuple}
+    icon={MAP_ICONS.stopIcon}
+  >
+    <Popup>
+      <BusStopPopup 
+        stop={stop}
+        stopTimes={stopTimes}
+        routes={routes}
+      />
+    </Popup>
+  </Marker>
+))}
 
         {/* バスの現在位置マーカー */}
         {vehicles && vehicles.map((vehicle) => {
