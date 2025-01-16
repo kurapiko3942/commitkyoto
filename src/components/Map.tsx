@@ -329,7 +329,7 @@ export default function Map() {
 
           const routeId = vehicle.vehicle?.trip?.routeId;
           const routeInfo = routes.find((r) => {
-            return r.route_id === vehicle.vehicle?.trip?.routeId;
+            return r.route_id == vehicle.vehicle?.trip?.routeId;
           });
           
           const position: LatLngTuple = [
