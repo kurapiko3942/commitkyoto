@@ -7,7 +7,10 @@ import { useGTFSData } from "@/hooks/useGTFSData";
 import SideBar from "@/components/layouts/SideBar";
 import { GTFSStop, MAP_ICONS } from "@/types/gtfsTypes";
 import { PhotoSlider } from "./PhotoSlider";
-import { getOccupancyStatusColor, getOccupancyStatusText } from "@/utils/occupancyStatus";
+import {
+  getOccupancyStatusColor,
+  getOccupancyStatusText,
+} from "@/utils/occupancyStatus";
 
 // 京都市の中心座標
 const KYOTO_CENTER: LatLngTuple = [35.0116, 135.7681];
@@ -17,16 +20,16 @@ const busIcon = new Icon({
   iconUrl: "/bus-icon.svg",
   iconSize: [32, 32],
   iconAnchor: [16, 16],
-  popupAnchor: [0, -16]
+  popupAnchor: [0, -16],
 });
 
 const userLocationIcon = new Icon({
-    iconUrl: "/user_location.svg",
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
-    popupAnchor: [0, -20],
-    className: 'animate-pulse opacity-90'
-  });
+  iconUrl: "/user_location.svg",
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
+  popupAnchor: [0, -20],
+  className: "animate-pulse opacity-90",
+});
 
 interface UserLocation {
   position: LatLngTuple;
@@ -92,12 +95,14 @@ const TOURIST_LANDMARKS: TouristLandmark[] = [
     nameEn: "Kyoto Station",
     placeId: "ChIJ7wKLka4IAWARCByidG5EGrY",
     position: [34.9858, 135.7588] as LatLngTuple,
-  }
+  },
 ];
 
 export default function Map() {
   const { routes, stops, vehicles, loading, error } = useGTFSData();
-  const [placeDetails, setPlaceDetails] = useState<Record<string, PlaceDetails>>({});
+  const [placeDetails, setPlaceDetails] = useState<
+    Record<string, PlaceDetails>
+  >({});
   const [landmarkIcons, setLandmarkIcons] = useState<Record<string, Icon>>({});
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
 
@@ -108,14 +113,15 @@ export default function Map() {
       iconSize: [50, 50],
       iconAnchor: [25, 25],
       popupAnchor: [0, -25],
-      className: 'rounded-full border-2 border-white shadow-lg hover:border-blue-500 transition-all'
+      className:
+        "rounded-full border-2 border-white shadow-lg hover:border-blue-500 transition-all",
     });
   };
 
   // 位置情報の取得
   useEffect(() => {
     if (!navigator.geolocation) {
-      console.log('Geolocation is not supported');
+      console.log("Geolocation is not supported");
       return;
     }
 
@@ -124,17 +130,17 @@ export default function Map() {
         const newLocation: UserLocation = {
           position: [position.coords.latitude, position.coords.longitude],
           accuracy: position.coords.accuracy,
-          heading: position.coords.heading
+          heading: position.coords.heading,
         };
         setUserLocation(newLocation);
       },
       (error) => {
-        console.error('Error getting location:', error);
+        console.error("Error getting location:", error);
       },
       {
         enableHighAccuracy: true,
         timeout: 5000,
-        maximumAge: 0
+        maximumAge: 0,
       }
     );
 
@@ -152,20 +158,20 @@ export default function Map() {
           if (!response.ok) continue;
 
           const details = await response.json();
-          setPlaceDetails(prev => ({
+          setPlaceDetails((prev) => ({
             ...prev,
-            [landmark.id]: details
+            [landmark.id]: details,
           }));
 
           if (details.photoUrl) {
-            setLandmarkIcons(prev => ({
+            setLandmarkIcons((prev) => ({
               ...prev,
-              [landmark.id]: createLandmarkIcon(details.photoUrl)
+              [landmark.id]: createLandmarkIcon(details.photoUrl),
             }));
           }
         }
       } catch (error) {
-        console.error('Error fetching place details:', error);
+        console.error("Error fetching place details:", error);
       }
     };
 
@@ -200,33 +206,32 @@ export default function Map() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
+
         {/* 現在位置のマーカー */}
         {userLocation && (
-  <Marker
-    position={userLocation.position}
-    icon={userLocationIcon}
-  >
-    <Popup>
-      <div className="text-sm">
-        <h3 className="font-bold mb-1">現在地</h3>
-        <p className="text-gray-600">精度: {Math.round(userLocation.accuracy)}m</p>
-        {userLocation.heading !== null && (
-          <p className="text-gray-600">
-            方角: {Math.round(userLocation.heading)}°
-          </p>
+          <Marker position={userLocation.position} icon={userLocationIcon}>
+            <Popup>
+              <div className="text-sm">
+                <h3 className="font-bold mb-1">現在地</h3>
+                <p className="text-gray-600">
+                  精度: {Math.round(userLocation.accuracy)}m
+                </p>
+                {userLocation.heading !== null && (
+                  <p className="text-gray-600">
+                    方角: {Math.round(userLocation.heading)}°
+                  </p>
+                )}
+              </div>
+            </Popup>
+          </Marker>
         )}
-      </div>
-    </Popup>
-  </Marker>
-)}
-        
+
         {/* 観光地のマーカー */}
         {TOURIST_LANDMARKS.map((landmark) => {
           const details = placeDetails[landmark.id];
-          const icon = details?.iconUrl ? 
-            createLandmarkIcon(details.iconUrl) : 
-            createLandmarkIcon('/landmark-default.svg');
+          const icon = details?.iconUrl
+            ? createLandmarkIcon(details.iconUrl)
+            : createLandmarkIcon("/landmark-default.svg");
 
           const getCrowdLevel = (popularity: number | undefined) => {
             if (popularity === undefined) return "データなし";
@@ -245,18 +250,22 @@ export default function Map() {
           };
 
           return (
-            <Marker
-              key={landmark.id}
-              position={landmark.position}
-              icon={icon}
-            >
+            <Marker key={landmark.id} position={landmark.position} icon={icon}>
               <Popup>
                 <div className="text-sm max-w-xs">
-                  <h3 className="font-bold text-lg mb-1">{details?.name || landmark.name}</h3>
-                  <p className="text-gray-600 mb-2">{details?.nameEn || landmark.nameEn}</p>
-                  
+                  <h3 className="font-bold text-lg mb-1">
+                    {details?.name || landmark.name}
+                  </h3>
+                  <p className="text-gray-600 mb-2">
+                    {details?.nameEn || landmark.nameEn}
+                  </p>
+
                   {details?.currentPopularity !== undefined && (
-                    <p className={`mb-2 ${getCrowdLevelColor(details.currentPopularity)}`}>
+                    <p
+                      className={`mb-2 ${getCrowdLevelColor(
+                        details.currentPopularity
+                      )}`}
+                    >
                       <span className="font-semibold">混雑状況: </span>
                       {getCrowdLevel(details.currentPopularity)}
                       <span className="text-sm ml-1">
@@ -264,14 +273,14 @@ export default function Map() {
                       </span>
                     </p>
                   )}
-                  
+
                   {details?.photoUrls && (
-                    <PhotoSlider 
+                    <PhotoSlider
                       photos={details.photoUrls}
                       placeName={details.name}
                     />
                   )}
-                  
+
                   {details?.rating && (
                     <div className="flex items-center mb-2">
                       <span className="text-yellow-500">★</span>
@@ -281,7 +290,7 @@ export default function Map() {
                       </span>
                     </div>
                   )}
-                  
+
                   {details?.address && (
                     <div className="text-gray-600 mb-2">
                       <div className="font-semibold">住所:</div>
@@ -306,69 +315,75 @@ export default function Map() {
         })}
 
         {/* バス停のマーカー */}
-        {stops && stops.map((stop: GTFSStop) => (
-          <Marker
-            key={stop.stop_id}
-            position={[stop.stop_lat, stop.stop_lon] as LatLngTuple}
-            icon={MAP_ICONS.stopIcon}
-          >
-            <Popup>
-              <div className="text-sm">
-                <h3 className="font-bold mb-1">バス停: {stop.stop_name}</h3>
-                <p>ID: {stop.stop_id}</p>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-
-        {/* バスの現在位置マーカー */}
-        {vehicles && vehicles.map((vehicle) => {
-          if (!vehicle.vehicle?.position) return null;
-
-          const routeId = vehicle.vehicle?.trip?.routeId;
-          const routeInfo = routes.find((r) => {
-            return r.route_id === vehicle.vehicle?.trip?.routeId;
-          });
-          
-          const position: LatLngTuple = [
-            vehicle.vehicle.position.latitude,
-            vehicle.vehicle.position.longitude
-          ];
-
-          return (
+        {stops &&
+          stops.map((stop: GTFSStop) => (
             <Marker
-              key={vehicle.id}
-              position={position}
-              icon={busIcon}
+              key={stop.stop_id}
+              position={[stop.stop_lat, stop.stop_lon] as LatLngTuple}
+              icon={MAP_ICONS.stopIcon}
             >
               <Popup>
                 <div className="text-sm">
-                  <h3 className="font-bold mb-1">バス ID: {vehicle.id}</h3>
-                  <p>
-                    路線:
-                    {`${routeInfo?.route_short_name}${routeInfo?.route_long_name}` ||
-                      "不明"}
-                  </p>
-                  <p className={`mb-1 ${getOccupancyStatusColor(vehicle.vehicle?.occupancyStatus || "")}`}>
-                    混雑度: {getOccupancyStatusText(vehicle.vehicle?.occupancyStatus || "")}
-                  </p>
-                  {vehicle.vehicle.position.speed !== undefined && (
-                    <p className="mb-1">
-                      速度: {Math.round(vehicle.vehicle.position.speed)} m/s
-                    </p>
-                  )}
-                  {vehicle.vehicle.timestamp && (
-                    <p>
-                      更新: {new Date(
-                        parseInt(vehicle.vehicle.timestamp) * 1000
-                      ).toLocaleString("ja-JP")}
-                    </p>
-                  )}
+                  <h3 className="font-bold mb-1">バス停: {stop.stop_name}</h3>
+                  <p>ID: {stop.stop_id}</p>
                 </div>
               </Popup>
             </Marker>
-          );
-        })}
+          ))}
+
+        {/* バスの現在位置マーカー */}
+        {vehicles &&
+          vehicles.map((vehicle) => {
+            if (!vehicle.vehicle?.position) return null;
+
+            const routeId = vehicle.vehicle?.trip?.routeId;
+            const routeInfo = routes.find((r) => {
+              return r.route_id == vehicle.vehicle?.trip?.routeId;
+            });
+
+            const position: LatLngTuple = [
+              vehicle.vehicle.position.latitude,
+              vehicle.vehicle.position.longitude,
+            ];
+
+            return (
+              <Marker key={vehicle.id} position={position} icon={busIcon}>
+                <Popup>
+                  <div className="text-sm">
+                    <h3 className="font-bold mb-1">バス ID: {vehicle.id}</h3>
+                    <p>
+                      路線:
+                      {`${routeInfo?.route_short_name}${routeInfo?.route_long_name}` ||
+                        "不明"}
+                    </p>
+                    <p
+                      className={`mb-1 ${getOccupancyStatusColor(
+                        vehicle.vehicle?.occupancyStatus || ""
+                      )}`}
+                    >
+                      混雑度:{" "}
+                      {getOccupancyStatusText(
+                        vehicle.vehicle?.occupancyStatus || ""
+                      )}
+                    </p>
+                    {vehicle.vehicle.position.speed !== undefined && (
+                      <p className="mb-1">
+                        速度: {Math.round(vehicle.vehicle.position.speed)} m/s
+                      </p>
+                    )}
+                    {vehicle.vehicle.timestamp && (
+                      <p>
+                        更新:{" "}
+                        {new Date(
+                          parseInt(vehicle.vehicle.timestamp) * 1000
+                        ).toLocaleString("ja-JP")}
+                      </p>
+                    )}
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
       </MapContainer>
     </div>
   );
