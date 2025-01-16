@@ -8,7 +8,7 @@ export interface GTFSRealtimeVehicle {
   vehicle?: {
     trip?: {
       trip_id?: string;
-      routeId?: string;
+      routeId?: number;
       direction_id?: number;
       start_time?: string;
       start_date?: string;
@@ -52,7 +52,7 @@ export interface GTFSStop {
     wheelchair_boarding?: number;
 }
 export interface GTFSTrip {
-  route_id: string;
+  route_id: number;
   service_id: string;
   trip_id: string;
   trip_headsign: string;
@@ -109,7 +109,7 @@ export interface GTFSMapIcons {
   
   export interface GTFSFareRule {
     fare_id: string;
-    route_id: string;
+    route_id: number;
     origin_id?: string;
     destination_id?: string;
   }
