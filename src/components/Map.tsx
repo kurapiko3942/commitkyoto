@@ -11,6 +11,7 @@ import {
   getOccupancyStatusColor,
   getOccupancyStatusText,
 } from "@/utils/occupancyStatus";
+import { BusStopPopup } from "./BusStopPopup";
 
 // 京都市の中心座標
 const KYOTO_CENTER: LatLngTuple = [35.0116, 135.7681];
@@ -99,7 +100,7 @@ const TOURIST_LANDMARKS: TouristLandmark[] = [
 ];
 
 export default function Map() {
-  const { routes, stops, vehicles, loading, error } = useGTFSData();
+  const { routes, stops, vehicles, stopTimes, loading, error } = useGTFSData();
   const [placeDetails, setPlaceDetails] = useState<
     Record<string, PlaceDetails>
   >({});
@@ -323,10 +324,11 @@ export default function Map() {
               icon={MAP_ICONS.stopIcon}
             >
               <Popup>
-                <div className="text-sm">
-                  <h3 className="font-bold mb-1">バス停: {stop.stop_name}</h3>
-                  <p>ID: {stop.stop_id}</p>
-                </div>
+                <BusStopPopup
+                  stop={stop}
+                  stopTimes={stopTimes}
+                  routes={routes}
+                />
               </Popup>
             </Marker>
           ))}
