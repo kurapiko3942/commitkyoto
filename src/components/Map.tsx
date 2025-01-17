@@ -278,7 +278,7 @@ const TOURIST_LANDMARKS: TouristLandmark[] = [
 ];
 
 export default function Map() {
-  const { routes, stops, vehicles, stopTimes, loading, error } = useGTFSData();
+  const { routes, stops, vehicles, stopTimes, trips, loading, error } = useGTFSData();
   const [placeDetails, setPlaceDetails] = useState<Record<string, PlaceDetails>>({});
   const [landmarkIcons, setLandmarkIcons] = useState<Record<string, Icon>>({});
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -506,6 +506,7 @@ export default function Map() {
                 stop={stop}
                 stopTimes={stopTimes}
                 routes={routes}
+                trips={trips}
               />
             </Popup>
           </Marker>

@@ -90,6 +90,7 @@ export function useGTFSData() {
     stops: staticData.stops,
     trips: staticData.trips,
     stopTimes: staticData.stopTimes,
+ 
     fareAttributes: staticData.fareAttributes,
     fareRules: staticData.fareRules,
     vehicles,
