@@ -77,7 +77,7 @@ export const BusStopPopup = ({
 
     loader.load(
       modelPath,
-      (gltf: { scene: any; }) => {
+      (gltf: { scene: THREE.Object3D }) => {
         model = gltf.scene;
         model.scale.set(0.2, 0.2, 0.2); // モデルのスケールを少し小さめに設定
         model.position.set(0, 0, 0); // モデルの中央を基準に配置
@@ -85,7 +85,7 @@ export const BusStopPopup = ({
         animate();
       },
       undefined,
-      (error: any) => {
+      (error: Error) => {
         console.error("Error loading model:", error);
       }
     );

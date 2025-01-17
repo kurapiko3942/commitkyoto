@@ -17,7 +17,7 @@ const ACCESS_TOKEN = process.env.NEXT_PUBLIC_ACCESS_TOKEN;
 export async function GET() {
  try {
    if (!GTFS_STATIC_URL || !ACCESS_TOKEN) {
-     console.error('GTFS URL or Access Token is missing');
+     
      return NextResponse.json(
        { error: 'Configuration error' },
        { status: 500 }
@@ -43,7 +43,7 @@ export async function GET() {
      const parseFile = async <T>(filename: string): Promise<T[]> => {
        const file = loadedZip.file(filename);
        if (!file) {
-         console.warn(`File ${filename} not found in ZIP`);
+         
          return [];
        }
        
@@ -55,7 +55,6 @@ export async function GET() {
            skipEmptyLines: true,
            complete: (results) => resolve(results.data as T[]),
            error: (error: any) => {
-             console.error(`Error parsing ${filename}:`, error);
              resolve([]);
            }
          });
@@ -72,14 +71,7 @@ export async function GET() {
        parseFile<GTFSFareRule>('fare_rules.txt')
      ]);
 
-     console.log('Files parsed successfully:', {
-       routesCount: routes.length,
-       stopsCount: stops.length,
-       tripsCount: trips.length,
-       stopTimesCount: stopTimes.length,
-       fareAttributesCount: fareAttributes.length,
-       fareRulesCount: fareRules.length
-     });
+     
 
      return NextResponse.json({
        routes,
@@ -91,7 +83,7 @@ export async function GET() {
      });
 
    } catch (err) {
-     console.error('Error fetching or parsing GTFS data:', err);
+     
      return NextResponse.json(
        { error: 'Failed to fetch GTFS data', details: err instanceof Error ? err.message : 'Unknown error' },
        { status: 500 }
@@ -99,7 +91,7 @@ export async function GET() {
    }
 
  } catch (error) {
-   console.error('Error in GTFS route:', error);
+   
    return NextResponse.json(
      { error: 'Internal server error' },
      { status: 500 }
