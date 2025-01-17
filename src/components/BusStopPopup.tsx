@@ -44,8 +44,7 @@ export const BusStopPopup = ({
     });
   };
 
-  useEffect(() => {
-    if (!containerRef.current) return;
+  
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -67,16 +66,12 @@ export const BusStopPopup = ({
     // ライトの設定
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
-    // ライトの設定
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
+    
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
     directionalLight.position.set(5, 5, 5);
     scene.add(directionalLight);
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 5, 5);
-    scene.add(directionalLight);
+    
 
     // GLTFLoader で3Dモデルをロード
     const loader = new GLTFLoader();
@@ -110,34 +105,7 @@ export const BusStopPopup = ({
         : stop.stop_id === "127_1"
         ? "/ki3.glb"
         : "/default.glb";
-    const modelPath =
-      stop.stop_id === "55"
-        ? "/model1.glb"
-        : stop.stop_id === "56"
-        ? "/model2.glb"
-        : stop.stop_id === "61_2"
-        ? "/C6.glb"
-        : stop.stop_id === "61"
-        ? "/D3.glb"
-        : stop.stop_id === "61_1"
-        ? "/C3.glb"
-        : stop.stop_id === "61_3"
-        ? "/D2.glb"
-        : stop.stop_id === "55_4"
-        ? "/E.glb"
-        : stop.stop_id === "55_1"
-        ? "/B.glb"
-        : stop.stop_id === "55"
-        ? "/C.glb"
-        : stop.stop_id === "73_1"
-        ? "/siA.glb"
-        : stop.stop_id === "73_3"
-        ? "/siA.glb"
-        : stop.stop_id === "127"
-        ? "/ki2.glb"
-        : stop.stop_id === "127_1"
-        ? "/ki3.glb"
-        : "/default.glb";
+    
 
     loader.load(
       modelPath,
