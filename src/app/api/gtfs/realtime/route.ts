@@ -1,3 +1,4 @@
+//src/app/api/gtfs/realtime/route.ts
 import { NextResponse } from "next/server";
 import * as protobuf from "protobufjs";
 import path from "path";
@@ -36,8 +37,7 @@ export async function GET() {
     const FeedMessage = root.lookupType("transit_realtime.FeedMessage");
 
     try {
-      // デバッグ用：バイナリデータの最初の部分を出力
-      const dataView = new Uint8Array(buffer);
+      
 
       const message = FeedMessage.decode(new Uint8Array(buffer));
       const decodedData = FeedMessage.toObject(message, {

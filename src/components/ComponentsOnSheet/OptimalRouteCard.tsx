@@ -1,7 +1,8 @@
 // components/ComponentsOnSheet/OptimalRouteCard.tsx
-import { calculateDistance } from '@/utils/distance';
+
 import { getOccupancyStatusText } from '@/utils/occupancyStatus';
 import { GTFSRealtimeVehicle, GTFSRoute, GTFSStop, GTFSFareAttribute, GTFSFareRule, GTFSStopTime } from "@/types/gtfsTypes";
+import { calculateDistance } from '@/utils/distance';
 
 interface OptimalRouteCardProps {
  destination: {
