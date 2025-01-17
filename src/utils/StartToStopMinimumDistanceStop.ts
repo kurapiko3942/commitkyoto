@@ -84,8 +84,9 @@ export const BusStopsToTo = (
     return { stop, distance };
   });
 
-  const filteredStops = stopsWithDistance.filter(
-    (item) => item.distance <= maxDistance
-  );
+  const filteredStops = stopsWithDistance
+    .filter((item) => item.distance <= maxDistance)
+    .sort((a, b) => a.distance - b.distance); // 距離が近い順に並び替え
+
   return filteredStops.map((item) => item.stop);
 };
