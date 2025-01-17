@@ -10,7 +10,24 @@ import {
   GTFSFareRule,
   GTFSStopTime,
 } from "@/types/gtfsTypes";
-
+/**
+ * GTFSデータを取得するためのカスタムフック
+ *
+ *
+ *
+ * @returns {Object} GTFSデータとリアルタイムの車両データを含むオブジェクト。
+ * @returns {GTFSRoute[]} return.routes 静的なルートデータの配列。
+ * @returns {GTFSStop[]} return.stops 静的な停留所データの配列。こいつ重要
+ * @returns {GTFSTrip[]} return.trips 静的なトリップデータの配列。
+ * @returns {GTFSStopTime[]} return.stopTimes 静的な停留所の時刻データの配列。
+ * @returns {GTFSFareAttribute[]} return.fareAttributes 静的な運賃属性データの配列。
+ * @returns {GTFSFareRule[]} return.fareRules 静的な運賃ルールデータの配列。
+ * @returns {GTFSRealtimeResponse["entity"][]} return.vehicles リアルタイムの車両データの配列。これでリアルタイムにバスを表示
+ * @returns {boolean} return.loading データが読み込み中かどうかを示すフラグ。
+ * @returns {Error | null} return.error データ取得時に発生したエラー情報。
+ * @throws {Error} データ取得に失敗した場合にエラーをスローします。
+ *
+ */
 export function useGTFSData() {
   const [staticData, setStaticData] = useState<{
     routes: GTFSRoute[];
@@ -41,7 +58,7 @@ export function useGTFSData() {
           throw new Error(`Failed to fetch static data: ${response.status}`);
         }
         const data = await response.json();
-        console.log('GTFS Static Data fetched:', data);
+        console.log("GTFS Static Data fetched:", data);
         setStaticData(data);
         setLoading(false);
       } catch (err) {
@@ -75,15 +92,6 @@ export function useGTFSData() {
     const interval = setInterval(fetchRealtime, 30000);
     return () => clearInterval(interval);
   }, []);
-
-  console.log('useGTFSData returning:', {
-    routesCount: staticData.routes.length,
-    stopsCount: staticData.stops.length,
-    vehiclesCount: vehicles.length,
-    stopTimesCount: staticData.stopTimes.length,
-    fareAttributesCount: staticData.fareAttributes.length,
-    fareRulesCount: staticData.fareRules.length,
-  });
 
   return {
     routes: staticData.routes,

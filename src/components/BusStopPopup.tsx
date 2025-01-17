@@ -31,7 +31,10 @@ export const BusStopPopup = ({
     camera.lookAt(0, 1, 0); // モデルの中心にカメラを向ける
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+    renderer.setSize(
+      containerRef.current.clientWidth,
+      containerRef.current.clientHeight
+    );
     containerRef.current.appendChild(renderer.domElement);
 
     // ライトの設定
@@ -77,7 +80,7 @@ export const BusStopPopup = ({
 
     loader.load(
       modelPath,
-      (gltf: { scene: any; }) => {
+      (gltf: { scene: any }) => {
         model = gltf.scene;
         model.scale.set(0.2, 0.2, 0.2); // モデルのスケールを少し小さめに設定
         model.position.set(0, 0, 0); // モデルの中央を基準に配置
@@ -85,9 +88,7 @@ export const BusStopPopup = ({
         animate();
       },
       undefined,
-      (error: any) => {
-        console.error("Error loading model:", error);
-      }
+      (error: any) => {}
     );
 
     // アニメーションループ
