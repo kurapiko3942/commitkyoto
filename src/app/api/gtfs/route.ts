@@ -18,6 +18,7 @@ export async function GET() {
  try {
    if (!GTFS_STATIC_URL || !ACCESS_TOKEN) {
      
+     
      return NextResponse.json(
        { error: 'Configuration error' },
        { status: 500 }
@@ -43,7 +44,7 @@ export async function GET() {
      const parseFile = async <T>(filename: string): Promise<T[]> => {
        const file = loadedZip.file(filename);
        if (!file) {
-        
+         console.warn(`File ${filename} not found in ZIP`);
          return [];
        }
        
@@ -83,7 +84,7 @@ export async function GET() {
      });
 
    } catch (err) {
-    
+     console.error('Error fetching or parsing GTFS data:', err);
      return NextResponse.json(
        { error: 'Failed to fetch GTFS data', details: err instanceof Error ? err.message : 'Unknown error' },
        { status: 500 }

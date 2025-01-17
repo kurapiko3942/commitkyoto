@@ -117,7 +117,7 @@ export default function Map() {
   // Map.tsxのuseEffect内を修正
 useEffect(() => {
     if (!navigator.geolocation) {
-      console.log('Geolocation is not supported');
+     
       return;
     }
   

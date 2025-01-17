@@ -51,16 +51,7 @@ export function OptimalRouteCard({
  const WALK_SPEED = 80; // 分速80m
  const MAX_WALKING_DISTANCE = 1000; // 最大徒歩距離 1km
 
- console.log('OptimalRouteCard received:', {
-   origin,
-   destination,
-   stopsCount: stops?.length,
-   vehiclesCount: vehicles?.length,
-   routesCount: routes?.length,
-   fareAttributesCount: fareAttributes?.length,
-   fareRulesCount: fareRules?.length,
-   stopTimesCount: stopTimes?.length,
- });
+ 
 
  const findRouteOptions = (): RouteOption[] => {
    const options: RouteOption[] = [];

@@ -6,22 +6,33 @@ const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ placeId: string }> }
+  request: Request,
+  { params }: { params: Promise<{ placeId: string }> }
 ) {
   try {
     if (!GOOGLE_MAPS_API_KEY) {
+      return Response.json({ error: "Missing API key" }, { status: 500 });
       return Response.json({ error: "Missing API key" }, { status: 500 });
     }
 
     // パラメータから placeId を取得
     const { placeId } = await params;
     
+    // パラメータから placeId を取得
+    const { placeId } = await params;
+    
     if (!placeId) {
+      return Response.json({ error: "Missing place ID" }, { status: 400 });
       return Response.json({ error: "Missing place ID" }, { status: 400 });
     }
 
     // Places API リクエストの構築
     const searchParams = new URLSearchParams({
       place_id: placeId,
+      fields:
+        "name,rating,user_ratings_total,formatted_address,opening_hours,photos",
+      language: "ja",
+      key: GOOGLE_MAPS_API_KEY,
       fields:
         "name,rating,user_ratings_total,formatted_address,opening_hours,photos",
       language: "ja",
@@ -33,13 +44,20 @@ export async function GET(
     const data = await response.json();
 
     if (data.status !== "OK") {
+    if (data.status !== "OK") {
       return Response.json(
+        { error: data.error_message || "Failed to fetch place details" },
         { error: data.error_message || "Failed to fetch place details" },
         { status: 400 }
       );
     }
 
     // 写真URLの生成
+    const photoUrls =
+      data.result.photos?.map(
+        (photo: { photo_reference: any }) =>
+          `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${GOOGLE_MAPS_API_KEY}`
+      ) || [];
     const photoUrls =
       data.result.photos?.map(
         (photo: { photo_reference: any }) =>
@@ -52,12 +70,15 @@ export async function GET(
       nameEn: data.result.name,
       photoUrls,
       iconUrl: photoUrls[0] || "/landmark-default.png",
+      iconUrl: photoUrls[0] || "/landmark-default.png",
       rating: data.result.rating,
       userRatingsTotal: data.result.user_ratings_total,
       address: data.result.formatted_address,
       openingHours: data.result.opening_hours?.weekday_text || [],
+      openingHours: data.result.opening_hours?.weekday_text || [],
     });
   } catch (error) {
+    return Response.json({ error: "Internal server error" }, { status: 500 });
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }

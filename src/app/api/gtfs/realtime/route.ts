@@ -50,13 +50,6 @@ export async function GET() {
         oneofs: true,
       });
 
-      console.log(
-        "Decoded protobuf data (first entity):",
-        decodedData.entity?.[0]
-          ? JSON.stringify(decodedData.entity[0], null, 2)
-          : "No entities"
-      );
-
       return NextResponse.json(decodedData);
     } catch (protoError) {
       console.error("Protobuf decode error:", protoError);
@@ -67,7 +60,7 @@ export async function GET() {
       throw protoError;
     }
   } catch (error: unknown) {
-    console.error("Realtime GTFS data fetch error:", error);
+    
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json(
