@@ -10,13 +10,16 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { BusStopsToTo } from "@/utils/K5IsBusToTo";
 import { useState } from "react";
 import { useGTFSData } from "@/hooks/useGTFSData";
 import { TouristSpot } from "@/types/routeTypes";
-import { StartToStopDistance } from "@/utils/K5distance";
+import {
+  StartToStopMinimumDistanceStop,
+  BusStopsToTo,
+} from "@/utils/StartToStopMinimumDistanceStop";
 import { ArrowLeftRight, Search } from "lucide-react";
-
+import { getRouteFromStop, getStopFromRoute } from "@/utils/getRouteToStop";
+import { IsStopsInTo } from "@/utils/IsStopsInTo";
 // 観光地の一覧
 const TOURIST_SPOTS = [
   {
@@ -53,18 +56,10 @@ export default function SideBar() {
     stops,
     stopTimes,
     vehicles,
-    fareAttributes,
-    fareRules,
+    trips,
     loading: gtfsLoading,
     error: gtfsError,
   } = useGTFSData();
-
-  console.log("routes", routes[0]);
-  console.log("stops", stops[0]);
-  console.log("stopTimes", stopTimes[0]);
-  console.log("vehicles", vehicles[0]);
-  console.log("fareAttributes", fareAttributes[0]);
-  console.log("fareRules", fareRules[0]);
 
   // 状態管理
   const [fromSpot, setFromSpot] = useState<TouristSpot | null>(null);
@@ -77,9 +72,29 @@ export default function SideBar() {
   // 検索開始
   const handleSearch = () => {
     if (!fromSpot || !toSpot || gtfsLoading) return;
-
-    console.log("一番近いやつ", StartToStopDistance(fromSpot, stops));
-    console.log("目的地一キロ以内のバス停", BusStopsToTo(toSpot, stops, 1));
+    const fromStop = StartToStopMinimumDistanceStop(fromSpot, stops);
+    const toStops = BusStopsToTo(toSpot, stops, 1);
+    if (fromStop) {
+      // 出発地に対応するルートを取得
+      const allRoutes = getRouteFromStop(fromStop, stopTimes, trips, routes);
+      // ルートに対応する停留所を取得
+      const StopssAndId = allRoutes.map((route) => ({
+        id: route.route_id,
+        stopss: getStopFromRoute(route, stopTimes, trips, stops),
+      }));
+      //取得したルートに目的地が含まれているかをルートそれぞれのstopsを確認することにより確認
+      //このroutesが目的地に到達するルートのリスト
+      const fitAllRoutes = StopssAndId.filter((stops) => {
+        return IsStopsInTo(stops.stopss, toStops) === true;
+      });
+      const filteredVehicles = vehicles.filter((vehicle) => {
+        return fitAllRoutes.some(
+          (route) => vehicle?.vehicle?.trip?.routeId === route.id
+        );
+      });
+      //ルートにマッチするリアルタイムバスを表示
+      console.log("Filtered vehicles:", filteredVehicles);
+    }
   };
 
   // 方向を反転
