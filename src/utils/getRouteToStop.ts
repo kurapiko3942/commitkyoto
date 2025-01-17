@@ -57,3 +57,39 @@ export const getStopFromRoute = (
   const uniqueStops = stops.filter((stop) => stopIds.includes(stop.stop_id));
   return uniqueStops;
 };
+interface StopTime {
+  arrival_time: string;
+  departure_time: string;
+}
+/**
+ * 一つのtripIdと停留所を指定するとそのルートと停留所に対応する時刻を返す
+ * @param route 一つのルート
+ * @param stopTimes 静的データ
+ * @param trips 動的なリアルタイムデータ
+ * @param stop 一つの停留所
+ * @returns 一つのルートと停留所に対応する時刻
+ */
+interface Trip {
+  trip_id: string;
+  routeId: number;
+  direction_id: number;
+  start_time: string;
+  start_date: string;
+  schedule_relationship: string;
+}
+export const getStopTimeFromRouteAndStop = (
+  stopId: string,
+  stopTimes: GTFSStopTime[],
+  trips: Trip
+): StopTime => {
+  const stopTime = stopTimes.filter(
+    (stopTime) => stopTime.trip_id == trips.trip_id
+  );
+  const stopTime2 = stopTime.find((stopTime) => stopTime.stop_id == stopId);
+  if (stopTime2)
+    return {
+      arrival_time: stopTime2.arrival_time,
+      departure_time: stopTime2.departure_time,
+    };
+  return { arrival_time: "", departure_time: "" };
+};

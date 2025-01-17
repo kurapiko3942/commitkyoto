@@ -8,6 +8,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { getStopTimeFromRouteAndStop } from "@/utils/getRouteToStop";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
@@ -69,9 +70,13 @@ export default function SideBar() {
   const [fromDistance, setFromDistance] = useState("0");
   const [toDistance, setToDistance] = useState("0");
   const [isReverse, setIsReverse] = useState(false);
+
   const [routesList, setRoutesList] = useState<
     {
       matchedStopName: string | null;
+      arrival_time: string;
+      departure_time: string;
+      occupancyStatus: string;
       fromSpot: string;
       id: number;
       stopss: GTFSStop[];
@@ -117,14 +122,27 @@ export default function SideBar() {
           return typeof stops.matchedStopName === "string";
         });
 
-        //
         setRoutesList((prevRoutesList) => {
           const newRoutesList = [...prevRoutesList, ...fitAllRoutes];
+          const matchedVehicles = vehicles.filter((vehicle) => {
+            fitAllRoutes.some(
+              (route) => route.id == vehicle.vehicle.trip.routeId
+            );
+          });
+          const time = getStopTimeFromRouteAndStop(
+            fitAllRoutes.find((route) => {
+              route.id == matchedVehicles[0].vehicle.trip.routeId;
+              return route.matchedStopName;
+            }) || "null",
+            stopTimes,
+            matchedVehicles[0].vehicle.trip
+          );
+
           const uniqueRoutesList = newRoutesList.filter(
             (route, index, self) =>
               index === self.findIndex((r) => r.id === route.id)
           );
-          return uniqueRoutesList;
+          return [time, ...uniqueRoutesList];
         });
         //ルートにマッチするリアルタイムバスを表示
       });
