@@ -7,7 +7,7 @@ import {
     GTFSFareRule,
     GTFSStopTime 
   } from './gtfsTypes';
-import { RouteOption } from './routeTypes';
+
   
   export interface RouteResultProps {
     fromSpot: {
@@ -29,9 +29,4 @@ import { RouteOption } from './routeTypes';
     sortBy: 'time' | 'fare' | 'transfers';
   }
   
-  export interface RouteDisplayProps {
-    route: RouteOption;
-    isExpanded: boolean;
-    onToggle: () => void;
-    type: 'fastest' | 'comfortable';
-  }
+  
