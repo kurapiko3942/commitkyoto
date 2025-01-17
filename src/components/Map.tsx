@@ -523,63 +523,68 @@ export default function Map() {
           </Marker>
         ))}
 
-        {/* バスの現在位置マーカー */}
-        {vehicles &&
-          vehicles.map((vehicle) => {
-            if (!vehicle.vehicle?.position) return null;
+{/* // バスの現在位置マーカー部分のみを変更 */}
+{vehicles &&
+  vehicles.map((vehicle) => {
+    if (!vehicle.vehicle?.position) return null;
 
-            const routeId = vehicle.vehicle?.trip?.routeId;
-            const routeInfo = routes.find((r) => {
-              return r.route_id == vehicle.vehicle?.trip?.routeId;
-            });
+    const routeId = vehicle.vehicle?.trip?.routeId;
+    const routeInfo = routes.find((r) => {
+      return r.route_id == vehicle.vehicle?.trip?.routeId;
+    });
 
-            const position: LatLngTuple = [
-              vehicle.vehicle.position.latitude,
-              vehicle.vehicle.position.longitude,
-            ];
+    const position: LatLngTuple = [
+      vehicle.vehicle.position.latitude,
+      vehicle.vehicle.position.longitude,
+    ];
 
-            return (
-              <Marker
-                key={vehicle.id}
-                position={position}
-                icon={busIcons.default}
-              >
-                <Popup>
-                  <div className="text-sm">
-                    <h3 className="font-bold mb-1">バス ID: {vehicle.id}</h3>
-                    <p>
-                      路線:
-                      {`${routeInfo?.route_short_name}${routeInfo?.route_long_name}` ||
-                        "不明"}
-                    </p>
-                    <p
-                      className={`mb-1 ${getOccupancyStatusColor(
-                        vehicle.vehicle?.occupancyStatus || ""
-                      )}`}
-                    >
-                      混雑度:{" "}
-                      {getOccupancyStatusText(
-                        vehicle.vehicle?.occupancyStatus || ""
-                      )}
-                    </p>
-                    {vehicle.vehicle.position.speed !== undefined && (
-                      <p className="mb-1">
-                        速度: {Math.round(vehicle.vehicle.position.speed)} m/s
-                      </p>
-                    )}
-                    {vehicle.vehicle.timestamp && (
-                      <p>
-                        更新:{" "}
-                        {new Date(
-                          parseInt(vehicle.vehicle.timestamp) * 1000
-                        ).toLocaleString("ja-JP")}
-                      </p>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            );
-          })}
+    // 変更点: occupancyStatusに基づいてアイコンを取得
+    const busIcon = getBusIconByOccupancy(
+      vehicle.vehicle?.occupancyStatus || ""
+    );
+
+    return (
+      <Marker
+        key={vehicle.id}
+        position={position}
+        icon={busIcon}  // アイコンを変更
+      >
+        <Popup>
+          <div className="text-sm">
+            <h3 className="font-bold mb-1">バス ID: {vehicle.id}</h3>
+            <p>
+              路線:
+              {`${routeInfo?.route_short_name}${routeInfo?.route_long_name}` ||
+                "不明"}
+            </p>
+            <p
+              className={`mb-1 ${getOccupancyStatusColor(
+                vehicle.vehicle?.occupancyStatus || ""
+              )}`}
+            >
+              混雑度:{" "}
+              {getOccupancyStatusText(
+                vehicle.vehicle?.occupancyStatus || ""
+              )}
+            </p>
+            {vehicle.vehicle.position.speed !== undefined && (
+              <p className="mb-1">
+                速度: {Math.round(vehicle.vehicle.position.speed)} m/s
+              </p>
+            )}
+            {vehicle.vehicle.timestamp && (
+              <p>
+                更新:{" "}
+                {new Date(
+                  parseInt(vehicle.vehicle.timestamp) * 1000
+                ).toLocaleString("ja-JP")}
+              </p>
+            )}
+          </div>
+        </Popup>
+      </Marker>
+    );
+  })}
       </MapContainer>
 
       {/* "使い方"ボタン */}
