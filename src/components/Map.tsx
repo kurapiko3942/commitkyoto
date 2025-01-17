@@ -282,10 +282,8 @@ const TOURIST_LANDMARKS: TouristLandmark[] = [
 ];
 
 export default function Map() {
-  const { routes, stops, vehicles, stopTimes, loading, error } = useGTFSData();
-  const [placeDetails, setPlaceDetails] = useState<
-    Record<string, PlaceDetails>
-  >({});
+  const { routes, stops, vehicles, stopTimes, trips, loading, error } = useGTFSData();
+  const [placeDetails, setPlaceDetails] = useState<Record<string, PlaceDetails>>({});
   const [landmarkIcons, setLandmarkIcons] = useState<Record<string, Icon>>({});
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
 
@@ -508,22 +506,22 @@ export default function Map() {
         })}
 
         {/* バス停のマーカー */}
-        {stops &&
-          stops.map((stop: GTFSStop) => (
-            <Marker
-              key={stop.stop_id}
-              position={[stop.stop_lat, stop.stop_lon] as LatLngTuple}
-              icon={MAP_ICONS.stopIcon}
-            >
-              <Popup>
-                <BusStopPopup
-                  stop={stop}
-                  stopTimes={stopTimes}
-                  routes={routes}
-                />
-              </Popup>
-            </Marker>
-          ))}
+        {stops && stops.map((stop: GTFSStop) => (
+          <Marker
+            key={stop.stop_id}
+            position={[stop.stop_lat, stop.stop_lon] as LatLngTuple}
+            icon={MAP_ICONS.stopIcon}
+          >
+            <Popup>
+              <BusStopPopup 
+                stop={stop}
+                stopTimes={stopTimes}
+                routes={routes}
+                trips={trips}
+              />
+            </Popup>
+          </Marker>
+        ))}
 
         {/* バスの現在位置マーカー */}
         {vehicles &&
