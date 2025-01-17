@@ -37,8 +37,6 @@ export async function GET() {
     const FeedMessage = root.lookupType("transit_realtime.FeedMessage");
 
     try {
-      
-
       const message = FeedMessage.decode(new Uint8Array(buffer));
       const decodedData = FeedMessage.toObject(message, {
         longs: String,
@@ -52,15 +50,11 @@ export async function GET() {
 
       return NextResponse.json(decodedData);
     } catch (protoError) {
-      console.error("Protobuf decode error:", protoError);
       if (protoError instanceof Error) {
-        console.error("Error message:", protoError.message);
-        console.error("Error stack:", protoError.stack);
       }
       throw protoError;
     }
   } catch (error: unknown) {
-    
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json(

@@ -1,3 +1,4 @@
+// src/app/api/places/[placeId]/route.ts
 import { NextRequest } from "next/server";
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -11,9 +12,8 @@ export async function GET(
       return Response.json({ error: "Missing API key" }, { status: 500 });
     }
 
-    // パラメータから placeId を取得
-    const { placeId } = await params;
-    
+    // URL から placeId を取得（パラメータの直接使用を避ける）
+    const placeId = request.url.split("/").pop();
     if (!placeId) {
       return Response.json({ error: "Missing place ID" }, { status: 400 });
     }
