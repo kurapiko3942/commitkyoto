@@ -74,12 +74,8 @@ export default function SideBar() {
   const [routesList, setRoutesList] = useState<
     {
       matchedStopName: string | null;
-      arrival_time: string;
-      departure_time: string;
-      occupancyStatus: string;
       fromSpot: string;
       id: number;
-      stopss: GTFSStop[];
     }[]
   >([]);
 
@@ -121,28 +117,18 @@ export default function SideBar() {
         }).filter((stops) => {
           return typeof stops.matchedStopName === "string";
         });
-
+        //const matchedVehicles = vehicles.filter((vehicle) => {
+        //   fitAllRoutes.some(
+        //     (route) => route.id == vehicle.vehicle.trip.routeId
+        //   );
+        // });
         setRoutesList((prevRoutesList) => {
           const newRoutesList = [...prevRoutesList, ...fitAllRoutes];
-          const matchedVehicles = vehicles.filter((vehicle) => {
-            fitAllRoutes.some(
-              (route) => route.id == vehicle.vehicle.trip.routeId
-            );
-          });
-          const time = getStopTimeFromRouteAndStop(
-            fitAllRoutes.find((route) => {
-              route.id == matchedVehicles[0].vehicle.trip.routeId;
-              return route.matchedStopName;
-            }) || "null",
-            stopTimes,
-            matchedVehicles[0].vehicle.trip
-          );
-
           const uniqueRoutesList = newRoutesList.filter(
             (route, index, self) =>
               index === self.findIndex((r) => r.id === route.id)
           );
-          return [time, ...uniqueRoutesList];
+          return [...uniqueRoutesList];
         });
         //ルートにマッチするリアルタイムバスを表示
       });

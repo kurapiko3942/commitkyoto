@@ -540,7 +540,11 @@ export default function Map() {
             ];
 
             return (
-              <Marker key={vehicle.id} position={position} icon={busIcon}>
+              <Marker
+                key={vehicle.id}
+                position={position}
+                icon={busIcons.default}
+              >
                 <Popup>
                   <div className="text-sm">
                     <h3 className="font-bold mb-1">バス ID: {vehicle.id}</h3>
