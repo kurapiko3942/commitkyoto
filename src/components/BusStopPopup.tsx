@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { GTFSStop, GTFSStopTime, GTFSRoute } from "@/types/gtfsTypes";
 
 export const BusStopPopup = ({
