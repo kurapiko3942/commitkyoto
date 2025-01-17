@@ -13,13 +13,78 @@ import { BusStopPopup } from "./BusStopPopup";
 // 京都市の中心座標
 const KYOTO_CENTER: LatLngTuple = [35.0116, 135.7681];
 
-// バスのマーカーアイコンを設定
-const busIcon = new Icon({
-  iconUrl: "/bus-icon.svg",
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
-  popupAnchor: [0, -16]
-});
+// バスの混雑度に応じたアイコンを設定
+const busIcons = {
+  empty: new Icon({
+    iconUrl: "/bus-icon-1.svg",  // #0CF947 - 明るい緑
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16]
+  }),
+  manySeatsAvailable: new Icon({
+    iconUrl: "/bus-icon-2.svg",  // #0CF9ED - 水色
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16]
+  }),
+  fewSeatsAvailable: new Icon({
+    iconUrl: "/bus-icon-3.svg",  // #3CFF91 - 淡い緑
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16]
+  }),
+  standingRoomOnly: new Icon({
+    iconUrl: "/bus-icon-4.svg",  // #9EFFAA - より淡い緑
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16]
+  }),
+  crushedStandingRoomOnly: new Icon({
+    iconUrl: "/bus-icon-5.svg",  // #CB41F9 - 紫
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16]
+  }),
+  fullStandingRoomOnly: new Icon({
+    iconUrl: "/bus-icon-6.svg",  // #F90C0C - 赤
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16]
+  }),
+  notAcceptingPassengers: new Icon({
+    iconUrl: "/bus-icon-7.svg",  // #FF8859 - オレンジ
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16]
+  }),
+  default: new Icon({
+    iconUrl: "/bus-icon.svg",
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16]
+  })
+};
+
+const getBusIconByOccupancy = (occupancyStatus: string) => {
+  switch (occupancyStatus) {
+    case 'EMPTY':
+      return busIcons.empty;
+    case 'MANY_SEATS_AVAILABLE':
+      return busIcons.manySeatsAvailable;
+    case 'FEW_SEATS_AVAILABLE':
+      return busIcons.fewSeatsAvailable;
+    case 'STANDING_ROOM_ONLY':
+      return busIcons.standingRoomOnly;
+    case 'CRUSHED_STANDING_ROOM_ONLY':
+      return busIcons.crushedStandingRoomOnly;
+    case 'FULL_STANDING_ROOM_ONLY':
+      return busIcons.fullStandingRoomOnly;
+    case 'NOT_ACCEPTING_PASSENGERS':
+      return busIcons.notAcceptingPassengers;
+    default:
+      return busIcons.default;
+  }
+};
 
 const userLocationIcon = new Icon({
     iconUrl: "/user_location.svg",
@@ -114,10 +179,8 @@ export default function Map() {
   };
 
   // 位置情報の取得
-  // Map.tsxのuseEffect内を修正
-useEffect(() => {
+  useEffect(() => {
     if (!navigator.geolocation) {
-     
       return;
     }
   
@@ -130,15 +193,13 @@ useEffect(() => {
         };
         setUserLocation(newLocation);
       },
-      (err: GeolocationPositionError) => {  // 型を明示的に指定
-        // より具体的なエラーメッセージを提供
+      (err: GeolocationPositionError) => {
         const errorMessage = {
           1: "位置情報の使用が許可されていません",
           2: "位置情報を取得できません",
           3: "位置情報の取得がタイムアウトしました"
         }[err.code] || "位置情報の取得に失敗しました";
         
-        // 開発時のみログを出力
         if (process.env.NODE_ENV === 'development') {
           console.warn(`Geolocation error: ${errorMessage}`);
         }
@@ -215,23 +276,23 @@ useEffect(() => {
         
         {/* 現在位置のマーカー */}
         {userLocation && (
-  <Marker
-    position={userLocation.position}
-    icon={userLocationIcon}
-  >
-    <Popup>
-      <div className="text-sm">
-        <h3 className="font-bold mb-1">現在地</h3>
-        <p className="text-gray-600">精度: {Math.round(userLocation.accuracy)}m</p>
-        {userLocation.heading !== null && (
-          <p className="text-gray-600">
-            方角: {Math.round(userLocation.heading)}°
-          </p>
+          <Marker
+            position={userLocation.position}
+            icon={userLocationIcon}
+          >
+            <Popup>
+              <div className="text-sm">
+                <h3 className="font-bold mb-1">現在地</h3>
+                <p className="text-gray-600">精度: {Math.round(userLocation.accuracy)}m</p>
+                {userLocation.heading !== null && (
+                  <p className="text-gray-600">
+                    方角: {Math.round(userLocation.heading)}°
+                  </p>
+                )}
+              </div>
+            </Popup>
+          </Marker>
         )}
-      </div>
-    </Popup>
-  </Marker>
-)}
         
         {/* 観光地のマーカー */}
         {TOURIST_LANDMARKS.map((landmark) => {
@@ -313,26 +374,26 @@ useEffect(() => {
                   )}
                 </div>
               </Popup>
-            </Marker>
+              </Marker>
           );
         })}
 
         {/* バス停のマーカー */}
-{stops && stops.map((stop: GTFSStop) => (
-  <Marker
-    key={stop.stop_id}
-    position={[stop.stop_lat, stop.stop_lon] as LatLngTuple}
-    icon={MAP_ICONS.stopIcon}
-  >
-    <Popup>
-      <BusStopPopup 
-        stop={stop}
-        stopTimes={stopTimes}
-        routes={routes}
-      />
-    </Popup>
-  </Marker>
-))}
+        {stops && stops.map((stop: GTFSStop) => (
+          <Marker
+            key={stop.stop_id}
+            position={[stop.stop_lat, stop.stop_lon] as LatLngTuple}
+            icon={MAP_ICONS.stopIcon}
+          >
+            <Popup>
+              <BusStopPopup 
+                stop={stop}
+                stopTimes={stopTimes}
+                routes={routes}
+              />
+            </Popup>
+          </Marker>
+        ))}
 
         {/* バスの現在位置マーカー */}
         {vehicles && vehicles.map((vehicle) => {
@@ -348,11 +409,14 @@ useEffect(() => {
             vehicle.vehicle.position.longitude
           ];
 
+          // 混雑度に基づいてアイコンを選択
+          const currentIcon = getBusIconByOccupancy(vehicle.vehicle?.occupancyStatus || "");
+
           return (
             <Marker
               key={vehicle.id}
               position={position}
-              icon={busIcon}
+              icon={currentIcon}
             >
               <Popup>
                 <div className="text-sm">
