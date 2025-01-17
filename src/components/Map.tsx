@@ -56,6 +56,121 @@ interface PlaceDetails {
   openingHours: string[];
   currentPopularity?: number;
 }
+// ファイル冒頭部分に既存コードの下に追加
+const HowToUseButton = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        bottom: "2rem",
+        right: "2rem",
+        zIndex: 1000,
+      }}
+    >
+      {/* "使い方"ボタン */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          padding: "1rem 2rem",
+          backgroundColor: "#007BFF",
+          color: "white",
+          border: "none",
+          borderRadius: ".5rem",
+          cursor: "pointer",
+        }}
+      >
+        {isOpen ? "閉じる ×" : "使い方"}
+      </button>
+
+      {/* アコーディオン内容 */}
+      {isOpen && (
+        <div
+          style={{
+            marginTop: "1rem",
+            padding: "1.5rem",
+            backgroundColor: "white",
+            border: ".1rem solid #ddd",
+            borderRadius: ".5rem",
+            boxShadow: "0px .4rem .6rem rgba(0, 0, 0, 0.1)",
+            width: "30rem",
+          }}
+        >
+          <h3 style={{ fontSize: "1.8rem", marginBottom: "1rem" }}>アプリの使い方</h3>
+          <div>
+            {/* アコーディオンアイテム */}
+            <AccordionItem
+              question="ルートを検索したい"
+              answer="右上の「観光地間ルート検索」を押すと快適なバスのルートを検索することができます。動いているバスをクリックすると快適度を見ることができます。"
+            />
+            <AccordionItem
+              question="バス停の情報を見たい"
+              answer="バス停をクリックするとバス停の3Dモデルや時刻表、名前が表示されます。"
+            />
+            <AccordionItem
+              question="今から乗るバスの快適さを知りたい"
+              answer="動いているバスをクリックすると快適度を見ることができます。"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+const AccordionItem = ({
+  question,
+  answer,
+}: {
+  question: string;
+  answer: string;
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div
+      style={{
+        border: ".1rem solid #ddd",
+        borderRadius: ".5rem",
+        marginBottom: "1rem",
+        overflow: "hidden",
+        boxShadow: isExpanded ? "0px .4rem .6rem rgba(0, 0, 0, 0.1)" : "none",
+      }}
+    >
+      {/* 質問部分 */}
+      <div
+        style={{
+          backgroundColor: isExpanded ? "#f9f9f9" : "#fff",
+          padding: "1rem",
+          cursor: "pointer",
+          fontWeight: "bold",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <span>Q: {question}</span>
+        <span>{isExpanded ? "▲" : "▼"}</span>
+      </div>
+
+      {/* 回答部分（開閉可能） */}
+      {isExpanded && (
+        <div
+          style={{
+            padding: "1rem",
+            backgroundColor: "#fff",
+            borderTop: "1px solid #ddd",
+          }}
+        >
+          <span style={{ color: "#007BFF", fontWeight: "bold" }}>A:</span>{" "}
+          {answer}
+        </div>
+      )}
+    </div>
+  );
+};
+
 
 // 観光地の基本情報
 const TOURIST_LANDMARKS: TouristLandmark[] = [
@@ -372,6 +487,9 @@ export default function Map() {
           );
         })}
       </MapContainer>
+
+      {/* "使い方"ボタン */}
+      <HowToUseButton />
     </div>
   );
 }
