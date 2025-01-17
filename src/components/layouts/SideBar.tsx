@@ -23,7 +23,7 @@ import { getRouteFromStop, getStopFromRoute } from "@/utils/getRouteToStop";
 import { IsStopsInTo } from "@/utils/IsStopsInTo";
 // 観光地の一覧
 import { Input } from "@/components/ui/input";
-import { GTFSStop } from "@/types/gtfsTypes";
+import { GTFSStop, GTFSRealtimeVehicle } from "@/types/gtfsTypes";
 const TOURIST_SPOTS = [
   {
     id: "kinkakuji",
@@ -70,7 +70,7 @@ export default function SideBar() {
   const [fromDistance, setFromDistance] = useState("0");
   const [toDistance, setToDistance] = useState("0");
   const [isReverse, setIsReverse] = useState(false);
-
+  const [bus, setBus] = useState<GTFSRealtimeVehicle[]>();
   const [routesList, setRoutesList] = useState<
     {
       matchedStopName: string | null;
@@ -93,9 +93,7 @@ export default function SideBar() {
     );
     // 目的地から1km圏内最寄りのバス停を取得
     // 目的地から1km圏内最寄りのバス停を取得
-    console.log("fromSpot", fromStop);
     const toStops = BusStopsToTo(toSpot, stops, Number(toDistance));
-    console.log("toStops", toStops);
     if (fromStop) {
       fromStop.forEach((fromStop) => {
         // 出発地に対応するルートを取得
@@ -117,11 +115,14 @@ export default function SideBar() {
         }).filter((stops) => {
           return typeof stops.matchedStopName === "string";
         });
-        //const matchedVehicles = vehicles.filter((vehicle) => {
-        //   fitAllRoutes.some(
-        //     (route) => route.id == vehicle.vehicle.trip.routeId
-        //   );
-        // });
+
+        const matchedVehicles = vehicles.filter((vehicle) => {
+          return fitAllRoutes.some(
+            (route) => route.id == vehicle.vehicle?.trip?.routeId
+          );
+        });
+        setBus(matchedVehicles);
+
         setRoutesList((prevRoutesList) => {
           const newRoutesList = [...prevRoutesList, ...fitAllRoutes];
           const uniqueRoutesList = newRoutesList.filter(
@@ -259,6 +260,21 @@ export default function SideBar() {
                   </Label>
                   <Label className="block text-white mb-2">
                     到着駅:{route.matchedStopName}
+                  </Label>
+                </div>
+              );
+            })}
+            {bus?.map((vehicle, index) => {
+              return (
+                <div key={index}>
+                  <Label className="block text-white mb-2">
+                    バスID:{vehicle.vehicle?.vehicle?.id}
+                  </Label>
+                  <Label className="block text-white mb-2">
+                    ルートID:{vehicle.vehicle?.trip?.routeId}
+                  </Label>
+                  <Label className="block text-white mb-2">
+                    混雑度:{vehicle.vehicle?.occupancyStatus}
                   </Label>
                 </div>
               );

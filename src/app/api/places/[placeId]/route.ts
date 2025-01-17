@@ -26,7 +26,6 @@ export async function GET(
       language: "ja",
       key: GOOGLE_MAPS_API_KEY,
     });
-
     const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?${searchParams}`;
     const response = await fetch(detailsUrl);
     const data = await response.json();

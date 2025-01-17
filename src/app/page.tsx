@@ -9,7 +9,6 @@ import "swiper/css/pagination";
 
 // Map を動的に読み込み
 const Map = dynamic(() => import("../components/Map"), { ssr: false });
-
 export default function Home() {
   const [showMap, setShowMap] = useState(false);
 
