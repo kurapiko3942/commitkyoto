@@ -3,13 +3,101 @@
 @tailwind utilities;
 
 @import "leaflet/dist/leaflet.css";
+
+/* Leaflet styles */
 .leaflet-container {
   width: 100%;
   height: 100%;
 }
 
+/* Base styles */
+html,
 body {
+  position: relative;
+  height: 100%;
+  font-size: 87.5%;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Swiper styles */
+.swiper-container {
+  width: 100%;
+  height: 100%;
+}
+
+.swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.swiper-slide {
+  text-align: center;
+  font-size: 18px;
+  background-color: #00ABEF;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  display: block;
+  color: #fff;
+}
+
+.swiper-pagination-bullet {
+  width: 1.2rem !important;
+  height: 1.2rem !important;
+  background-color: white !important;
+  border-radius: 50%;
+  margin: 0 .5rem;
+  transition: opacity 0.3s ease;
+}
+
+.swiper-pagination-bullet-active {
+  border: .75rem solid white !important;
+  background-color: white !important;
+}
+
+.slide-img {
+  margin-inline: auto;
+  width: 38rem;
+  padding-top: 10%;
+}
+
+.slide-img > img {
+  width: 100%;
+  height: auto;
+}
+
+.swiper-slide p,
+.swiper-slide button {
+  margin-top: 5%;
+  font-size: 3rem;
+  font-family: sans-serif;
+}
+
+.start-button {
+  padding: 2.4rem 4.8rem;
+  font-size: 3rem;
+  font-weight: bold;
+  color: #004494;
+  background-color: #fff;
+  border: none;
+  border-radius: 5rem;
+  box-shadow: 0 .8rem 1.2rem rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.start-button:hover {
+  background-color: #004494;
+  transform: translateY(-.2rem);
+  box-shadow: 0 .6rem 1rem rgba(0, 0, 0, 0.2);
+  color: #fff;
+}
+
+.start-button:active {
+  background-color: #fff;
+  transform: translateY(0);
+  box-shadow: 0 .4rem .6rem rgba(0, 0, 0, 0.1);
+  color: #004494;
 }
 
 @layer base {
@@ -40,6 +128,7 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
