@@ -8,23 +8,26 @@ import { GTFSStop } from "../types/gtfsTypes";
  */
 export const StartToStopMinimumDistanceStop = (
   spot: TouristSpot,
-  stops: GTFSStop[]
-): GTFSStop | null => {
-  if (stops.length === 0) return null;
+  stops: GTFSStop[],
+  maxDistance: number = 1
+): GTFSStop[] => {
+  console.log("Frommax", maxDistance);
+  const stopsWithDistance = stops.map((stop) => {
+    // 緯度と経度をログに出力して確認
+    const distance = calculateDistance(
+      spot.position[0],
+      spot.position[1],
+      stop.stop_lat,
+      stop.stop_lon
+    );
+    return { stop, distance };
+  });
 
-  const nearestStop = stops
-    .map((stop) => ({
-      stop,
-      distance: calculateDistance(
-        spot.position[0],
-        spot.position[1],
-        stop.stop_lat,
-        stop.stop_lon
-      ),
-    }))
-    .sort((a, b) => a.distance - b.distance)[0];
+  const filteredStops = stopsWithDistance.filter(
+    (item) => item.distance <= maxDistance
+  );
 
-  return nearestStop ? nearestStop.stop : null;
+  return filteredStops.map((item) => item.stop);
 };
 
 /**
@@ -64,12 +67,12 @@ export const calculateDistance = (
 export const BusStopsToTo = (
   spot: TouristSpot,
   stops: GTFSStop[],
-  max: number = 1
+  maxDistance: number = 1
 ): GTFSStop[] => {
+  console.log("Tomax", maxDistance);
   if (stops.length === 0) {
     return [];
   }
-
   const stopsWithDistance = stops.map((stop) => {
     // 緯度と経度をログに出力して確認
     const distance = calculateDistance(
@@ -82,8 +85,7 @@ export const BusStopsToTo = (
   });
 
   const filteredStops = stopsWithDistance.filter(
-    (item) => item.distance <= max
+    (item) => item.distance <= maxDistance
   );
-
   return filteredStops.map((item) => item.stop);
 };

@@ -21,6 +21,8 @@ import { ArrowLeftRight, Search } from "lucide-react";
 import { getRouteFromStop, getStopFromRoute } from "@/utils/getRouteToStop";
 import { IsStopsInTo } from "@/utils/IsStopsInTo";
 // 観光地の一覧
+import { Input } from "@/components/ui/input";
+import { GTFSStop } from "@/types/gtfsTypes";
 const TOURIST_SPOTS = [
   {
     id: "kinkakuji",
@@ -64,36 +66,68 @@ export default function SideBar() {
   // 状態管理
   const [fromSpot, setFromSpot] = useState<TouristSpot | null>(null);
   const [toSpot, setToSpot] = useState<TouristSpot | null>(null);
-
+  const [fromDistance, setFromDistance] = useState("0");
+  const [toDistance, setToDistance] = useState("0");
   const [isReverse, setIsReverse] = useState(false);
+  const [routesList, setRoutesList] = useState<
+    {
+      matchedStopName: string | null;
+      fromSpot: string;
+      id: number;
+      stopss: GTFSStop[];
+    }[]
+  >([]);
 
   // ルート計算
 
   // 検索開始
   const handleSearch = () => {
     if (!fromSpot || !toSpot || gtfsLoading) return;
-    const fromStop = StartToStopMinimumDistanceStop(fromSpot, stops);
-    const toStops = BusStopsToTo(toSpot, stops, 1);
+    // 出発地から最寄りのバス停を取得
+    setRoutesList([]);
+    const fromStop = StartToStopMinimumDistanceStop(
+      fromSpot,
+      stops,
+      Number(fromDistance)
+    );
+    // 目的地から1km圏内最寄りのバス停を取得
+    // 目的地から1km圏内最寄りのバス停を取得
+    console.log("fromSpot", fromStop);
+    const toStops = BusStopsToTo(toSpot, stops, Number(toDistance));
+    console.log("toStops", toStops);
     if (fromStop) {
-      // 出発地に対応するルートを取得
-      const allRoutes = getRouteFromStop(fromStop, stopTimes, trips, routes);
-      // ルートに対応する停留所を取得
-      const StopssAndId = allRoutes.map((route) => ({
-        id: route.route_id,
-        stopss: getStopFromRoute(route, stopTimes, trips, stops),
-      }));
-      //取得したルートに目的地が含まれているかをルートそれぞれのstopsを確認することにより確認
-      //このroutesが目的地に到達するルートのリスト
-      const fitAllRoutes = StopssAndId.filter((stops) => {
-        return IsStopsInTo(stops.stopss, toStops) === true;
+      fromStop.forEach((fromStop) => {
+        // 出発地に対応するルートを取得
+        const allRoutes = getRouteFromStop(fromStop, stopTimes, trips, routes);
+        // ルートに対応する停留所を取得
+        const StopssAndId = allRoutes.map((route) => ({
+          id: route.route_id,
+          stopss: getStopFromRoute(route, stopTimes, trips, stops),
+        }));
+        //取得したルートに目的地が含まれているかをルートそれぞれのstopsを確認することにより確認
+        //このroutesが目的地に到達するルートのリスト
+        const fitAllRoutes = StopssAndId.map((stops) => {
+          const matchedStopName = IsStopsInTo(stops.stopss, toStops);
+          return {
+            ...stops,
+            matchedStopName,
+            fromSpot: fromStop.stop_name,
+          };
+        }).filter((stops) => {
+          return typeof stops.matchedStopName === "string";
+        });
+
+        //
+        setRoutesList((prevRoutesList) => {
+          const newRoutesList = [...prevRoutesList, ...fitAllRoutes];
+          const uniqueRoutesList = newRoutesList.filter(
+            (route, index, self) =>
+              index === self.findIndex((r) => r.id === route.id)
+          );
+          return uniqueRoutesList;
+        });
+        //ルートにマッチするリアルタイムバスを表示
       });
-      const filteredVehicles = vehicles.filter((vehicle) => {
-        return fitAllRoutes.some(
-          (route) => vehicle?.vehicle?.trip?.routeId === route.id
-        );
-      });
-      //ルートにマッチするリアルタイムバスを表示
-      console.log("Filtered vehicles:", filteredVehicles);
     }
   };
 
@@ -102,7 +136,6 @@ export default function SideBar() {
     setIsReverse(!isReverse);
     // 検索状態をリセット
   };
-
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -148,6 +181,16 @@ export default function SideBar() {
                 ))}
               </select>
             </div>
+            <Input
+              type="number"
+              className="text-white"
+              step="0.1"
+              value={fromDistance}
+              placeholder="出発地からバス停までの距離"
+              onChange={(e) => {
+                setFromDistance(e.target.value);
+              }}
+            />
 
             {/* 方向転換ボタン */}
             <Button
@@ -158,7 +201,6 @@ export default function SideBar() {
               <ArrowLeftRight className="mr-2" />
               方向を変更
             </Button>
-
             {/* 目的地選択 */}
             <div className="bg-neutral-800 p-4 rounded-lg">
               <Label className="block text-white mb-2">
@@ -182,7 +224,16 @@ export default function SideBar() {
                 ))}
               </select>
             </div>
-
+            <Input
+              className="text-white"
+              type="number"
+              step="0.1"
+              placeholder="目的地からバス停までの距離"
+              onChange={(e) => {
+                setToDistance(e.target.value);
+              }}
+              value={toDistance}
+            />
             <Button
               variant="default"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"
@@ -192,10 +243,24 @@ export default function SideBar() {
               <Search className="mr-2 h-4 w-4" />
               経路を検索
             </Button>
-
+            {routesList.map((route, index) => {
+              const matchedRoute = routes.find((r) => r.route_id === route.id);
+              return (
+                <div className="bg-neutral-800 p-4 rounded-lg" key={index}>
+                  <Label className="block text-white mb-2">
+                    {matchedRoute?.route_long_name}
+                  </Label>
+                  <Label className="block text-white mb-2">
+                    出発駅:{route.fromSpot}
+                  </Label>
+                  <Label className="block text-white mb-2">
+                    到着駅:{route.matchedStopName}
+                  </Label>
+                </div>
+              );
+            })}
             {/* データ確認用の表示領域 */}
           </div>
-          {/* ルート表示 */}
         </SheetHeader>
       </SheetContent>
     </Sheet>

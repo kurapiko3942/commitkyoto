@@ -30,7 +30,7 @@ export const getRouteFromStop = (
   const uniqueRoutes = routes.filter((route) =>
     tripIds.includes(route.route_id)
   );
-  console.log("route", uniqueRoutes);
+
   return uniqueRoutes;
 };
 /**

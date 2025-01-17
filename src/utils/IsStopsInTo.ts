@@ -5,6 +5,10 @@ import { GTFSStop } from "../types/gtfsTypes";
  * @param toStops 目的地のバス停の配列
  * @returns 目的地のバス停がルート内のバス停に含まれているかどうか
  */
-export const IsStopsInTo = (stops: GTFSStop[], toStops: GTFSStop[]): bool => {
-  return toStops.some((toStop) => stops.includes(toStop));
+export const IsStopsInTo = (
+  stops: GTFSStop[],
+  toStops: GTFSStop[]
+): string | null => {
+  const matchedStop = toStops.find((toStop) => stops.includes(toStop));
+  return matchedStop ? matchedStop.stop_name : null;
 };
