@@ -55,8 +55,154 @@ export function OptimalRouteCard({
   stopTimes,
   sortBy,
 }: OptimalRouteCardProps) {
-  // ソート
+  const WALK_SPEED = 80; // 分速80m
+  const MAX_WALKING_DISTANCE = 1000; // 最大徒歩距離 1km
 
+  const findRouteOptions = (): RouteOption[] => {
+    const options: RouteOption[] = [];
+
+    // 1. 出発地から徒歩圏内のバス停を探す
+    const nearbyStartStops = stops.filter((stop) => {
+      const distance = calculateDistance(
+        origin.position[0],
+        origin.position[1],
+        stop.stop_lat,
+        stop.stop_lon
+      );
+      return distance <= MAX_WALKING_DISTANCE;
+    });
+
+    // 2. 目的地から徒歩圏内のバス停を探す
+    const nearbyEndStops = stops.filter((stop) => {
+      const distance = calculateDistance(
+        destination.position[0],
+        destination.position[1],
+        stop.stop_lat,
+        stop.stop_lon
+      );
+      return distance <= MAX_WALKING_DISTANCE;
+    });
+
+    // 3. 各バス停の組み合わせでルートを探索
+    nearbyStartStops.forEach((startStop) => {
+      nearbyEndStops.forEach((endStop) => {
+        // 利用可能なバスを探す
+        const availableBuses = vehicles.filter((vehicle) => {
+          const routeInfo = routes.find(
+            (r) => r.route_id === vehicle.vehicle?.trip?.routeId
+          );
+          if (!routeInfo) return false;
+
+          // このバスルートが開始バス停と終了バス停を通るか確認
+          const relevantStopTimes = stopTimes.filter(
+            (st) => st.trip_id === vehicle.vehicle?.trip?.trip_id
+          );
+          const stopsOnRoute = relevantStopTimes.map((st) => st.stop_id);
+
+          return (
+            stopsOnRoute.includes(startStop.stop_id) &&
+            stopsOnRoute.includes(endStop.stop_id)
+          );
+        });
+
+        availableBuses.forEach((bus) => {
+          const routeInfo = routes.find(
+            (r) => r.route_id === bus.vehicle?.trip?.routeId
+          );
+          if (!routeInfo) return;
+
+          const walkDistanceToStart = calculateDistance(
+            origin.position[0],
+            origin.position[1],
+            startStop.stop_lat,
+            startStop.stop_lon
+          );
+
+          const walkDistanceFromEnd = calculateDistance(
+            destination.position[0],
+            destination.position[1],
+            endStop.stop_lat,
+            endStop.stop_lon
+          );
+
+          // 運賃計算
+          const fareRule = fareRules.find(
+            (rule) => rule.route_id === routeInfo.route_id
+          );
+          const fareAttribute = fareRule
+            ? fareAttributes.find((attr) => attr.fare_id === fareRule.fare_id)
+            : null;
+          const fare = fareAttribute ? fareAttribute.price : 0;
+
+          const totalDistance = walkDistanceToStart + walkDistanceFromEnd;
+          const walkingTime =
+            (walkDistanceToStart + walkDistanceFromEnd) / WALK_SPEED;
+
+          // バスでの所要時間を計算
+          const relevantStopTimes = stopTimes
+            .filter((st) => st.trip_id === bus.vehicle?.trip?.trip_id)
+            .sort((a, b) => a.stop_sequence - b.stop_sequence);
+
+          const startStopTime = relevantStopTimes.find(
+            (st) => st.stop_id === startStop.stop_id
+          );
+          const endStopTime = relevantStopTimes.find(
+            (st) => st.stop_id === endStop.stop_id
+          );
+
+          const busTime =
+            startStopTime && endStopTime
+              ? calculateTimeDifference(
+                  startStopTime.arrival_time,
+                  endStopTime.arrival_time
+                )
+              : 20; // デフォルト値
+
+          options.push({
+            startStop,
+            endStop,
+            bus,
+            route: routeInfo,
+            walkDistanceToStart,
+            walkDistanceFromEnd,
+            totalDistance,
+            estimatedTime: walkingTime + busTime,
+            transfers: 0,
+            fare,
+          });
+        });
+      });
+    });
+
+    // ソート
+    return sortRoutes(options, sortBy);
+  };
+
+  const calculateTimeDifference = (time1: string, time2: string): number => {
+    const [h1, m1] = time1.split(":").map(Number);
+    const [h2, m2] = time2.split(":").map(Number);
+    return Math.abs(h2 * 60 + m2 - (h1 * 60 + m1));
+  };
+
+  const sortRoutes = (
+    routes: RouteOption[],
+    sortBy: "time" | "fare" | "transfers"
+  ): RouteOption[] => {
+    return [...routes].sort((a, b) => {
+      switch (sortBy) {
+        case "time":
+          return a.estimatedTime - b.estimatedTime;
+        case "fare":
+          return a.fare - b.fare;
+        case "transfers":
+          return a.transfers - b.transfers;
+        default:
+          return 0;
+      }
+    });
+  };
+
+  const routeOptions = findRouteOptions();
   const bestRoute = routeOptions[0];
 
   if (!bestRoute) {

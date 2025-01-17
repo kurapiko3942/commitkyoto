@@ -2,8 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTF, GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { GTFSStop, GTFSStopTime, GTFSRoute } from "@/types/gtfsTypes";
+import { Object3D } from "three/webgpu";
 
 export const BusStopPopup = ({
   stop,
@@ -47,7 +48,7 @@ export const BusStopPopup = ({
 
     // GLTFLoader で3Dモデルをロード
     const loader = new GLTFLoader();
-    let model: THREE.Object3D;
+    let model: Object3D; // Group から Object3D に変更
 
     const modelPath =
       stop.stop_id === "55"
@@ -80,7 +81,7 @@ export const BusStopPopup = ({
 
     loader.load(
       modelPath,
-      (gltf: { scene: any }) => {
+      (gltf: GLTF) => {
         model = gltf.scene;
         model.scale.set(0.2, 0.2, 0.2); // モデルのスケールを少し小さめに設定
         model.position.set(0, 0, 0); // モデルの中央を基準に配置
@@ -88,7 +89,9 @@ export const BusStopPopup = ({
         animate();
       },
       undefined,
-      (error: any) => {}
+      (error: Error) => {
+        console.error("Error loading model:", error);
+      }
     );
 
     // アニメーションループ

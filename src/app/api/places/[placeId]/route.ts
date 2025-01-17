@@ -3,13 +3,9 @@ import { NextRequest } from "next/server";
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-interface PlaceParams {
-  placeId: string;
-}
-
 export async function GET(
-  request: NextRequest,
-  context: { params: PlaceParams }
+  request: Request,
+  { params }: { params: Promise<{ placeId: string }> }
 ) {
   try {
     if (!GOOGLE_MAPS_API_KEY) {

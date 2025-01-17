@@ -58,7 +58,7 @@ export function useGTFSData() {
           throw new Error(`Failed to fetch static data: ${response.status}`);
         }
         const data = await response.json();
-        console.log("GTFS Static Data fetched:", data);
+
         setStaticData(data);
         setLoading(false);
       } catch (err) {
