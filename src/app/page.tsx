@@ -11,7 +11,7 @@ import "swiper/css/pagination";
 const Map = dynamic(() => import("../components/Map"), { ssr: false });
 
 export default function Home() {
-  const [showMap, setShowMap] = useState(false); // 地図を表示するか管理
+  const [showMap, setShowMap] = useState(false);
 
   if (showMap) {
     return <Map />;
@@ -21,20 +21,24 @@ export default function Home() {
     <div className="swiper-container">
       <Swiper modules={[Pagination]} pagination={{ clickable: true }}>
         <SwiperSlide>
-            <div className="slide-img"><img src="/slide1.png" alt="スライド1" /></div>
-            <p>混みにコミットで、快適な京都観光を！</p>
+          <div className="slide-img">
+            <img src="/slide1.png" alt="スライド1" />
+          </div>
+          <p>混みにコミットで、快適な京都観光を！</p>
         </SwiperSlide>
         <SwiperSlide>
-            <div className="slide-img"><img src="/slide1.png" alt="スライド1" /></div>
-            <p>
-              リアルタイムでバスの位置が分かり、モヤモヤしなくていい！
-            </p>
+          <div className="slide-img">
+            <img src="/slide1.png" alt="スライド1" />
+          </div>
+          <p>リアルタイムでバスの位置が分かり、モヤモヤしなくていい！</p>
         </SwiperSlide>
         <SwiperSlide>
-            <div className="slide-img"><img src="/slide1.png" alt="スライド1" /></div>
-            <button className="start-button" onClick={() => setShowMap(true)}>
-              START!
-            </button>
+          <div className="slide-img">
+            <img src="/slide1.png" alt="スライド1" />
+          </div>
+          <button className="start-button" onClick={() => setShowMap(true)}>
+            START!
+          </button>
         </SwiperSlide>
       </Swiper>
     </div>
