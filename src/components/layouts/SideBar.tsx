@@ -13,9 +13,12 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import { useGTFSData } from "@/hooks/useGTFSData";
-import { TouristSpot } from "@/types/routeTypes";
+import { TouristSpot } from '@/types/routeTypes';
+import { GTFSRoute, GTFSStop, GTFSStopTime } from '@/types/gtfsTypes';
 import { useRouteCalculation } from "@/hooks/useRouteCalculation";
-import { ArrowLeftRight } from "lucide-react";
+
+import { ArrowLeftRight, Search } from "lucide-react";
+import { findNearestStops } from '@/utils/routeUtils';
 import RouteContainer from "../routeDisplay/RouteContainer";
 
 // 観光地の一覧
@@ -49,30 +52,66 @@ const TOURIST_SPOTS = [
 
 export default function SideBar() {
   // GTFS データの取得
-  const { routes, stops, stopTimes, vehicles, fareAttributes, fareRules, loading: gtfsLoading } = useGTFSData();
+  const { 
+    routes, 
+    stops, 
+    stopTimes, 
+    vehicles, 
+    fareAttributes, 
+    fareRules, 
+    loading: gtfsLoading,
+    error: gtfsError 
+  } = useGTFSData();
 
   // 状態管理
   const [fromSpot, setFromSpot] = useState<TouristSpot | null>(null);
   const [toSpot, setToSpot] = useState<TouristSpot | null>(null);
   const [hasTrunk, setHasTrunk] = useState(false);
   const [isReverse, setIsReverse] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
+  const [nearestFromStops, setNearestFromStops] = useState<GTFSStop[]>([]);
+  const [nearestToStops, setNearestToStops] = useState<GTFSStop[]>([]);
+
+  // データの型アサーション
+  const typedRoutes = routes as GTFSRoute[];
+  const typedStops = stops as GTFSStop[];
+  const typedStopTimes = stopTimes as GTFSStopTime[];
+
+  // 最寄りバス停の計算
+  const findNearestStopsResult = (spot: TouristSpot | null) => {
+    if (!spot || !stops.length) return [];
+    return findNearestStops(spot, typedStops);
+  };
 
   // ルート計算
   const routeResult = useRouteCalculation({
     fromSpot: isReverse ? toSpot : fromSpot,
     toSpot: isReverse ? fromSpot : toSpot,
     hasTrunk,
-    routes,
-    stops,
-    stopTimes,
+    routes: typedRoutes,
+    stops: typedStops,
+    stopTimes: typedStopTimes,
     vehicles,
     fareAttributes,
     fareRules
   });
 
+  // 検索開始
+  const handleSearch = () => {
+    if (!fromSpot || !toSpot || gtfsLoading) return;
+    const fromStops = findNearestStopsResult(fromSpot);
+    const toStops = findNearestStopsResult(toSpot);
+    setNearestFromStops(fromStops);
+    setNearestToStops(toStops);
+    setShowDebug(true);
+    setIsSearching(true);
+  };
+
   // 方向を反転
   const handleReverseDirection = () => {
     setIsReverse(!isReverse);
+    setIsSearching(false);  // 検索状態をリセット
   };
 
   return (
@@ -105,6 +144,8 @@ export default function SideBar() {
                 onChange={(e) => {
                   const spot = TOURIST_SPOTS.find(s => s.id === e.target.value);
                   setFromSpot(spot || null);
+                  setIsSearching(false);  // 選択変更時に検索状態をリセット
+                  setShowDebug(false);  // デバッグ情報をリセット
                 }}
                 value={fromSpot?.id || ""}
               >
@@ -137,6 +178,8 @@ export default function SideBar() {
                 onChange={(e) => {
                   const spot = TOURIST_SPOTS.find(s => s.id === e.target.value);
                   setToSpot(spot || null);
+                  setIsSearching(false);  // 選択変更時に検索状態をリセット
+                  setShowDebug(false);  // デバッグ情報をリセット
                 }}
                 value={toSpot?.id || ""}
               >
@@ -155,7 +198,10 @@ export default function SideBar() {
                 <Checkbox
                   id="trunk"
                   checked={hasTrunk}
-                  onCheckedChange={(checked) => setHasTrunk(checked as boolean)}
+                  onCheckedChange={(checked) => {
+                    setHasTrunk(checked as boolean);
+                    setIsSearching(false);  // チェック変更時に検索状態をリセット
+                  }}
                 />
                 <Label
                   htmlFor="trunk"
@@ -165,10 +211,83 @@ export default function SideBar() {
                 </Label>
               </div>
             </div>
+
+            {/* 検索ボタン */}
+            <Button
+              variant="default"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={handleSearch}
+              disabled={!fromSpot || !toSpot || gtfsLoading}
+            >
+              <Search className="mr-2 h-4 w-4" />
+              経路を検索
+            </Button>
+
+            {/* データ確認用の表示領域 */}
+            {showDebug && (
+              <div className="mt-4 bg-neutral-800 p-4 rounded-lg overflow-auto max-h-[500px]">
+                <h3 className="text-white font-medium mb-2">データ確認</h3>
+                <div className="text-sm text-gray-300 space-y-2">
+                  <div>
+                    <p>GTFSデータのロード状態: {gtfsLoading ? 'ロード中' : 'ロード完了'}</p>
+                    <p>エラー状態: {gtfsError ? 'エラーあり' : 'エラーなし'}</p>
+                    <p>Routes: {routes.length}件</p>
+                    <p>Stops: {stops.length}件</p>
+                    <p>StopTimes: {stopTimes.length}件</p>
+                  </div>
+
+                  <div className="mt-4 border-t border-neutral-700 pt-4">
+                    <p className="font-medium mb-2">選択された地点:</p>
+                    <p>出発地: {fromSpot?.name} ({fromSpot?.position.join(', ')})</p>
+                    <p>目的地: {toSpot?.name} ({toSpot?.position.join(', ')})</p>
+                  </div>
+
+                  <div className="mt-4 border-t border-neutral-700 pt-4">
+                    <p className="font-medium mb-2">最寄りバス停:</p>
+                    <div className="space-y-2">
+                      <div>
+                        <p className="text-white">出発地周辺:</p>
+                        <ul className="ml-4 list-disc">
+                          {nearestFromStops.map(stop => (
+                            <li key={stop.stop_id}>
+                              {stop.stop_name} ({stop.stop_lat}, {stop.stop_lon})
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-white">目的地周辺:</p>
+                        <ul className="ml-4 list-disc">
+                          {nearestToStops.map(stop => (
+                            <li key={stop.stop_id}>
+                              {stop.stop_name} ({stop.stop_lat}, {stop.stop_lon})
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 border-t border-neutral-700 pt-4">
+                    <p className="font-medium mb-2">最初のRouteデータ:</p>
+                    <pre className="whitespace-pre-wrap break-words bg-neutral-700 p-2 rounded">
+                      {JSON.stringify(routes[0], null, 2)}
+                    </pre>
+                  </div>
+
+                  <div className="mt-4 border-t border-neutral-700 pt-4">
+                    <p className="font-medium mb-2">最初のStopデータ:</p>
+                    <pre className="whitespace-pre-wrap break-words bg-neutral-700 p-2 rounded">
+                      {JSON.stringify(stops[0], null, 2)}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ルート表示 */}
-          {(fromSpot && toSpot) && (
+          {(isSearching && !gtfsLoading && fromSpot && toSpot && routes.length > 0 && stops.length > 0 && stopTimes.length > 0) && (
             <RouteContainer
               result={routeResult}
               loading={gtfsLoading}
