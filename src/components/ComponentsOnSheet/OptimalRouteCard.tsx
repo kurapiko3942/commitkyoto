@@ -95,7 +95,7 @@ export function OptimalRouteCard({
 
           // このバスルートが開始バス停と終了バス停を通るか確認
           const relevantStopTimes = stopTimes.filter(
-            (st) => st.trip_id === vehicle.vehicle?.trip?.trip_id
+            (st) => st.trip_id === vehicle.vehicle?.trip?.tripId
           );
           const stopsOnRoute = relevantStopTimes.map((st) => st.stop_id);
 
@@ -140,7 +140,7 @@ export function OptimalRouteCard({
 
           // バスでの所要時間を計算
           const relevantStopTimes = stopTimes
-            .filter((st) => st.trip_id === bus.vehicle?.trip?.trip_id)
+            .filter((st) => st.trip_id === bus.vehicle?.trip?.tripId)
             .sort((a, b) => a.stop_sequence - b.stop_sequence);
 
           const startStopTime = relevantStopTimes.find(

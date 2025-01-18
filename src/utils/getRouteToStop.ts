@@ -100,3 +100,15 @@ export const getStopTimeFromRouteAndStop = (
     };
   return { arrival_time: "", departure_time: "" };
 };
+export const getSpotNameFromStopId = (
+  stopIds: string[] | null,
+  stops: GTFSStop[] | null
+): string[] => {
+  if (!Array.isArray(stopIds) || !Array.isArray(stops)) return [];
+
+  const stopNames = stops
+    .filter((stop) => stopIds.includes(stop.stop_id))
+    .map((stop) => stop.stop_name);
+
+  return stopNames;
+};
