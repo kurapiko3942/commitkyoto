@@ -1,6 +1,7 @@
 import {
   GTFSStop,
   GTFSStopTime,
+  GTFSRealtimeVehicle,
   GTFSTrip,
   GTFSRoute,
 } from "../types/gtfsTypes";
@@ -87,10 +88,13 @@ export const getRoutenameFromRouteId = (
 export const getStopTimeFromRouteAndStop = (
   stopId: string,
   stopTimes: GTFSStopTime[],
-  trips: Trip
+  trips: GTFSRealtimeVehicle[] | undefined
 ): StopTime => {
-  const stopTime = stopTimes.filter(
-    (stopTime) => stopTime.trip_id == trips.trip_id
+  if (!trips) return { arrival_time: "", departure_time: "" };
+  const tripIds = trips.map((trip) => trip.vehicle?.trip?.tripId);
+  console.log(tripIds);
+  const stopTime = stopTimes.filter((stopTime) =>
+    tripIds.includes(stopTime.trip_id)
   );
   const stopTime2 = stopTime.find((stopTime) => stopTime.stop_id == stopId);
   if (stopTime2)
@@ -99,4 +103,11 @@ export const getStopTimeFromRouteAndStop = (
       departure_time: stopTime2.departure_time,
     };
   return { arrival_time: "", departure_time: "" };
+};
+export const getStopIdfromStopName = (
+  stopName: string,
+  stops: GTFSStop[]
+): string => {
+  const stop = stops.find((stop) => stop.stop_name == stopName);
+  return stop ? stop.stop_id : "";
 };

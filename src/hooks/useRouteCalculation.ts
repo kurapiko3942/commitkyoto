@@ -277,7 +277,7 @@ function calculateMainRoute(
 
     // 7. 現在の混雑度を取得
     const currentVehicle = vehicles.find(
-      (v) => v.vehicle?.trip?.trip_id === tripId
+      (v) => v.vehicle?.trip?.tripId === tripId
     );
     const occupancyLevel = currentVehicle?.vehicle?.occupancyStatus
       ? (Number(currentVehicle.vehicle.occupancyStatus) as OccupancyLevel)

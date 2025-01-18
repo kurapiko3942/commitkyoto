@@ -8,6 +8,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { getStopIdfromStopName } from "@/utils/getRouteToStop";
 import { getRoutenameFromRouteId } from "@/utils/getRouteToStop";
 import { getStopTimeFromRouteAndStop } from "@/utils/getRouteToStop";
 import { Button } from "@/components/ui/button";
@@ -256,10 +257,29 @@ export default function SideBar() {
               const matchedBus = bus?.filter(
                 (vehicle) => vehicle.vehicle?.trip?.routeId == route.id
               );
-              console.log("ma", matchedBus);
-              const routeName =
-                matchedRoute?.route_long_name ||
-                getRoutenameFromRouteId(route.id, routes);
+
+              if (!route.fromSpot) return;
+
+              const FromRouteId = getStopIdfromStopName(route.fromSpot, stops);
+
+              const Fromtime = getStopTimeFromRouteAndStop(
+                FromRouteId,
+                stopTimes,
+                matchedBus
+              );
+              console.log(Fromtime);
+              if (!route.matchedStopName) return;
+              const ToRouteId = getStopIdfromStopName(
+                route.matchedStopName,
+                stops
+              );
+              const Totime = getStopTimeFromRouteAndStop(
+                ToRouteId,
+                stopTimes,
+                matchedBus
+              );
+              console.log(Totime);
+
               return (
                 <div className="bg-neutral-800 p-4 rounded-lg" key={index}>
                   <Label className="block text-white mb-2">
