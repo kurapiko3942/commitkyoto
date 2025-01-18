@@ -4,6 +4,7 @@
 import { NextResponse } from "next/server";
 import * as protobuf from "protobufjs";
 import path from "path";
+import { error } from "console";
 
 export async function GET() {
   try {
@@ -53,6 +54,7 @@ export async function GET() {
       return NextResponse.json(decodedData);
     } catch (protoError) {
       if (protoError instanceof Error) {
+        console.log("errorがおきました")
       }
       throw protoError;
     }
