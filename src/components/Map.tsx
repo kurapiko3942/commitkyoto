@@ -170,6 +170,7 @@ const HowToUseButton = () => {
           <h3 style={{ fontSize: "1.8rem", marginBottom: "1rem" }}>
             アプリの使い方
           </h3>
+          
           <div>
             {/* アコーディオンアイテム */}
             <AccordionItem
@@ -184,6 +185,7 @@ const HowToUseButton = () => {
               question="今から乗るバスの快適さを知りたい"
               answer="動いているバスをクリックすると快適度を見ることができます。"
             />
+            <NavigationButton/>
           </div>
         </div>
       )}
@@ -587,10 +589,11 @@ export default function Map() {
     );
   })}
       </MapContainer>
+{/* "マニュアル"ボタン */}
 
       {/* "使い方"ボタン */}
       <HowToUseButton />
-      <NavigationButton/>
+      
       {/* 混雑度早見表 */}
     <BusLegend />
     </div>
