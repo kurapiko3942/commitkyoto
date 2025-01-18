@@ -1,4 +1,6 @@
 //src/app/api/gtfs/realtime/route.ts
+"use server"
+
 import { NextResponse } from "next/server";
 import * as protobuf from "protobufjs";
 import path from "path";
