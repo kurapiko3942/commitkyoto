@@ -1,6 +1,6 @@
 "use client";
 
-import Image from 'next/image';
+import Image from "next/image";
 import {
   Sheet,
   SheetContent,
@@ -55,31 +55,33 @@ const TOURIST_SPOTS = [
 
 // 占有状況に対応するバスアイコンのマッピング
 const OCCUPANCY_ICONS: { [key: string]: string } = {
-  'EMPTY': '/bus-icon-1.svg',
-  'MANY_SEATS_AVAILABLE': '/bus-icon-2.svg',
-  'FEW_SEATS_AVAILABLE': '/bus-icon-3.svg',
-  'STANDING_ROOM_ONLY': '/bus-icon-4.svg',
-  'CRUSHED_STANDING_ROOM': '/bus-icon-6.svg',
-  'FULL': '/bus-icon-6.svg',
-  'NOT_ACCEPTING': '/bus-icon-7.svg',
-  'UNKNOWN': '/bus-icon-5.svg' // デフォルトアイコン
+  EMPTY: "/bus-icon-1.svg",
+  MANY_SEATS_AVAILABLE: "/bus-icon-2.svg",
+  FEW_SEATS_AVAILABLE: "/bus-icon-3.svg",
+  STANDING_ROOM_ONLY: "/bus-icon-4.svg",
+  CRUSHED_STANDING_ROOM: "/bus-icon-6.svg",
+  FULL: "/bus-icon-6.svg",
+  NOT_ACCEPTING: "/bus-icon-7.svg",
+  UNKNOWN: "/bus-icon-5.svg", // デフォルトアイコン
 };
 
 // 混雑度の日本語変換マップ
 const OCCUPANCY_STATUS_LABELS: { [key: string]: string } = {
-  'EMPTY': '空席多数',
-  'MANY_SEATS_AVAILABLE': '空席あり',
-  'FEW_SEATS_AVAILABLE': '空席わずか',
-  'STANDING_ROOM_ONLY': '立ち席のみ',
-  'CRUSHED_STANDING_ROOM': '非常に混雑',
-  'FULL': '満席',
-  'NOT_ACCEPTING': '乗車不可',
-  'UNKNOWN': '不明'
+  EMPTY: "空席多数",
+  MANY_SEATS_AVAILABLE: "空席あり",
+  FEW_SEATS_AVAILABLE: "空席わずか",
+  STANDING_ROOM_ONLY: "立ち席のみ",
+  CRUSHED_STANDING_ROOM: "非常に混雑",
+  FULL: "満席",
+  NOT_ACCEPTING: "乗車不可",
+  UNKNOWN: "不明",
 };
 
 // 占有状況に応じたアイコンを取得する関数
 const getOccupancyIcon = (occupancyStatus?: string) => {
-  return OCCUPANCY_ICONS[occupancyStatus || 'UNKNOWN'] || OCCUPANCY_ICONS['UNKNOWN'];
+  return (
+    OCCUPANCY_ICONS[occupancyStatus || "UNKNOWN"] || OCCUPANCY_ICONS["UNKNOWN"]
+  );
 };
 
 // ローディングスケルトン
@@ -89,7 +91,7 @@ const RouteLoadingSkeleton = () => {
       <div className="h-4 bg-neutral-700 rounded w-3/4 mb-2"></div>
       <div className="h-4 bg-neutral-700 rounded w-1/2 mb-2"></div>
       <div className="h-4 bg-neutral-700 rounded w-2/3 mb-2"></div>
-      
+
       {/* バスローディングスケルトン */}
       <div className="flex items-center space-x-2 mt-2 bg-neutral-700 p-2 rounded">
         <div className="w-8 h-8 bg-neutral-600 rounded-full"></div>
@@ -133,37 +135,43 @@ export default function SideBar() {
   // 検索開始
   const handleSearch = async () => {
     if (!fromSpot || !toSpot) return;
-    
+
     try {
       // 検索中フラグをON
       setIsSearching(true);
       setRoutesList([]);
+
       setBus(undefined);
-      
+
       // 非同期処理をシミュレート（必要に応じて実際の処理に置き換え）
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       // 出発地から最寄りのバス停を取得
       const fromStop = StartToStopMinimumDistanceStop(
         fromSpot,
         stops,
         Number(fromDistance)
       );
-      
+
       // 目的地から1km圏内最寄りのバス停を取得
       const toStops = BusStopsToTo(toSpot, stops, Number(toDistance));
-      
+
       if (fromStop) {
         fromStop.forEach((fromStop) => {
           // 出発地に対応するルートを取得
-          const allRoutes = getRouteFromStop(fromStop, stopTimes, trips, routes);
-          
+          const allRoutes = getRouteFromStop(
+            fromStop,
+            stopTimes,
+            trips,
+            routes
+          );
+
           // ルートに対応する停留所を取得
           const StopssAndId = allRoutes.map((route) => ({
             id: route.route_id,
             stopss: getStopFromRoute(route, stopTimes, trips, stops),
           }));
-          
+
           // 取得したルートに目的地が含まれているかを確認
           const fitAllRoutes = StopssAndId.map((stops) => {
             const matchedStopName = IsStopsInTo(stops.stopss, toStops);
@@ -181,8 +189,10 @@ export default function SideBar() {
               (route) => route.id == vehicle.vehicle?.trip?.routeId
             );
           });
-          
-          setBus(matchedVehicles);
+
+          setBus((prevBus) => {
+            return [...(prevBus || []), ...matchedVehicles];
+          });
 
           setRoutesList((prevRoutesList) => {
             const newRoutesList = [...prevRoutesList, ...fitAllRoutes];
@@ -195,7 +205,7 @@ export default function SideBar() {
         });
       }
     } catch (error) {
-      console.error('検索中にエラーが発生しました', error);
+      console.error("検索中にエラーが発生しました", error);
     } finally {
       // 検索中フラグをOFF
       setIsSearching(false);
@@ -259,6 +269,9 @@ export default function SideBar() {
                 ))}
               </select>
             </div>
+            <Label className="block text-white mb-2">
+              出発地からバス停までの距離
+            </Label>
             <Input
               type="number"
               className="text-white"
@@ -302,6 +315,9 @@ export default function SideBar() {
                 ))}
               </select>
             </div>
+            <Label className="block text-white mb-2">
+              目的地からバス停までの距離
+            </Label>
             <Input
               className="text-white"
               type="number"
@@ -330,43 +346,49 @@ export default function SideBar() {
                 <RouteLoadingSkeleton />
                 <RouteLoadingSkeleton />
               </>
-            ) : (
-              // 検索結果の表示
-              routesList.length > 0 ? (
-                routesList.map((route, index) => {
-                  const matchedRoute = routes.find((r) => r.route_id === route.id);
-                  const matchedBus = bus?.filter(
-                    (vehicle) => vehicle.vehicle?.trip?.routeId == route.id
-                  );
-                  const routeName = 
-                    matchedRoute?.route_long_name || 
-                    getRoutenameFromRouteId(route.id, routes);
-
-                  return (
-                    <div className="bg-neutral-800 p-4 rounded-lg mb-2" key={index}>
-                      <Label className="block text-white mb-2">
-                        {routeName}
-                      </Label>
-                      <Label className="block text-white mb-2">
-                        出発駅: {route.fromSpot}
-                      </Label>
-                      <Label className="block text-white mb-2">
-                        到着駅: {route.matchedStopName}
-                      </Label>
-
-                      {/* バス情報 */}
-                      {matchedBus && matchedBus.map((vehicle, busIndex) => {
-                        const occupancyStatus = vehicle.vehicle?.occupancyStatus;
+            ) : // 検索結果の表示
+            routesList.length > 0 ? (
+              routesList.map((route, index) => {
+                const matchedRoute = routes.find(
+                  (r) => r.route_id === route.id
+                );
+                const matchedBus = bus?.filter(
+                  (vehicle) => vehicle.vehicle?.trip?.routeId == route.id
+                );
+                const routeName =
+                  matchedRoute?.route_long_name ||
+                  getRoutenameFromRouteId(route.id, routes);
+                return (
+                  <div
+                    className="bg-neutral-800 p-4 rounded-lg mb-2"
+                    key={index}
+                  >
+                    <Label className="block text-white mb-2">{routeName}</Label>
+                    <Label className="block text-white mb-2">
+                      出発駅: {route.fromSpot}
+                    </Label>
+                    <Label className="block text-white mb-2">
+                      到着駅: {route.matchedStopName}
+                    </Label>
+                    {/* バス情報 */}
+                    {matchedBus &&
+                      matchedBus.map((vehicle, busIndex) => {
+                        const occupancyStatus =
+                          vehicle.vehicle?.occupancyStatus;
                         const occupancyIcon = getOccupancyIcon(occupancyStatus);
-                        const occupancyLabel = OCCUPANCY_STATUS_LABELS[occupancyStatus || 'UNKNOWN'];
+                        const occupancyLabel =
+                          OCCUPANCY_STATUS_LABELS[occupancyStatus || "UNKNOWN"];
 
                         return (
-                          <div key={busIndex} className="flex items-center space-x-2 mt-2 bg-neutral-700 p-2 rounded">
-                            <Image 
-                              src={occupancyIcon} 
-                              alt="バス混雑度アイコン" 
+                          <div
+                            key={busIndex}
+                            className="flex items-center space-x-2 mt-2 bg-neutral-700 p-2 rounded"
+                          >
+                            <Image
+                              src={occupancyIcon}
+                              alt="バス混雑度アイコン"
                               width={32}
-                              height={32} 
+                              height={32}
                               className="w-8 h-8"
                             />
                             <div className="flex flex-col">
@@ -374,9 +396,7 @@ export default function SideBar() {
                                 バスID: {vehicle.vehicle?.vehicle?.id}
                               </Label>
                               <div className="flex items-center space-x-2">
-                                <Label className="text-white">
-                                  混雑度:
-                                </Label>
+                                <Label className="text-white">混雑度:</Label>
                                 <span className="text-white font-semibold">
                                   {occupancyLabel}
                                 </span>
@@ -385,17 +405,16 @@ export default function SideBar() {
                           </div>
                         );
                       })}
-                    </div>
-                  );
-                })
-              ) : (
-                // 検索結果がない場合のメッセージ
-                <div className="text-center text-neutral-400 p-4">
-                  {fromSpot && toSpot 
-                    ? '検索条件に一致するルートが見つかりませんでした' 
-                    : '出発地と到着地を選択して経路を検索してください'}
-                </div>
-              )
+                  </div>
+                );
+              })
+            ) : (
+              // 検索結果がない場合のメッセージ
+              <div className="text-center text-neutral-400 p-4">
+                {fromSpot && toSpot
+                  ? "検索条件に一致するルートが見つかりませんでした"
+                  : "出発地と到着地を選択して経路を検索してください"}
+              </div>
             )}
           </div>
         </SheetHeader>
