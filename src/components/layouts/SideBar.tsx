@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useGTFSData } from "@/hooks/useGTFSData";
 import { TouristSpot } from "@/types/routeTypes";
+import { getSpotNameFromStopId } from "@/utils/getRouteToStop";
 import {
   StartToStopMinimumDistanceStop,
   BusStopsToTo,
@@ -189,9 +190,16 @@ export default function SideBar() {
               (route) => route.id == vehicle.vehicle?.trip?.routeId
             );
           });
-
           setBus((prevBus) => {
-            return [...(prevBus || []), ...matchedVehicles];
+            const newBusList = [...(prevBus || []), ...matchedVehicles];
+            const uniqueBusList = newBusList.filter(
+              (bus, index, self) =>
+                index ===
+                self.findIndex(
+                  (b) => b.vehicle?.vehicle?.id == bus.vehicle?.vehicle?.id
+                )
+            );
+            return uniqueBusList;
           });
 
           setRoutesList((prevRoutesList) => {
@@ -270,14 +278,14 @@ export default function SideBar() {
               </select>
             </div>
             <Label className="block text-white mb-2">
-              出発地からバス停までの距離
+              出発地からバス停までの距離(km)
             </Label>
             <Input
               type="number"
               className="text-white"
               step="0.1"
               value={fromDistance}
-              placeholder="出発地からバス停までの距離"
+              placeholder="出発地からバス停までの距離(km)"
               onChange={(e) => {
                 setFromDistance(e.target.value);
               }}
@@ -316,13 +324,13 @@ export default function SideBar() {
               </select>
             </div>
             <Label className="block text-white mb-2">
-              目的地からバス停までの距離
+              目的地からバス停までの距離(km)
             </Label>
             <Input
               className="text-white"
               type="number"
               step="0.1"
-              placeholder="目的地からバス停までの距離"
+              placeholder="目的地からバス停までの距離(km)"
               onChange={(e) => {
                 setToDistance(e.target.value);
               }}
@@ -355,9 +363,31 @@ export default function SideBar() {
                 const matchedBus = bus?.filter(
                   (vehicle) => vehicle.vehicle?.trip?.routeId == route.id
                 );
+                const vehicleIds = matchedBus?.map(
+                  (vehicle) => vehicle.vehicle?.trip?.tripId
+                );
+
+                const time = stopTimes?.filter((stop) => {
+                  return vehicleIds?.includes(String(stop.trip_id));
+                });
+
+                const uniqueTimes = Array.from(
+                  new Set(time.map((stop) => stop.trip_id))
+                ).map((trip_id) => {
+                  return time.find((stop) => stop.trip_id == trip_id);
+                });
+                console.log(uniqueTimes);
+                if (!uniqueTimes) return null;
+
+                if (!route.matchedStopName) return null;
+
+                console.log(time);
+                const timeArrival = time?.map((time) => time.stop_id);
+
                 const routeName =
                   matchedRoute?.route_long_name ||
                   getRoutenameFromRouteId(route.id, routes);
+
                 return (
                   <div
                     className="bg-neutral-800 p-4 rounded-lg mb-2"
@@ -371,6 +401,7 @@ export default function SideBar() {
                       到着駅: {route.matchedStopName}
                     </Label>
                     {/* バス情報 */}
+                    <Label>到着距離が短い順です</Label>
                     {matchedBus &&
                       matchedBus.map((vehicle, busIndex) => {
                         const occupancyStatus =
