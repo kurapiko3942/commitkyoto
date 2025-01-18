@@ -8,6 +8,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { getRoutenameFromRouteId } from "@/utils/getRouteToStop";
 import { getStopTimeFromRouteAndStop } from "@/utils/getRouteToStop";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -71,6 +72,7 @@ export default function SideBar() {
   const [toDistance, setToDistance] = useState("0");
   const [isReverse, setIsReverse] = useState(false);
   const [bus, setBus] = useState<GTFSRealtimeVehicle[]>();
+  const [busRouteName, setBusRouteName] = useState<string | null>(null);
   const [routesList, setRoutesList] = useState<
     {
       matchedStopName: string | null;
@@ -250,6 +252,14 @@ export default function SideBar() {
             </Button>
             {routesList.map((route, index) => {
               const matchedRoute = routes.find((r) => r.route_id === route.id);
+
+              const matchedBus = bus?.filter(
+                (vehicle) => vehicle.vehicle?.trip?.routeId == route.id
+              );
+              console.log("ma", matchedBus);
+              const routeName =
+                matchedRoute?.route_long_name ||
+                getRoutenameFromRouteId(route.id, routes);
               return (
                 <div className="bg-neutral-800 p-4 rounded-lg" key={index}>
                   <Label className="block text-white mb-2">
@@ -261,24 +271,15 @@ export default function SideBar() {
                   <Label className="block text-white mb-2">
                     到着駅:{route.matchedStopName}
                   </Label>
-                </div>
-              );
-            })}
-            {bus?.map((vehicle, index) => {
-              return (
-                <div key={index}>
                   <Label className="block text-white mb-2">
-                    バスID:{vehicle.vehicle?.vehicle?.id}
-                  </Label>
-                  <Label className="block text-white mb-2">
-                    ルートID:{vehicle.vehicle?.trip?.routeId}
-                  </Label>
-                  <Label className="block text-white mb-2">
-                    混雑度:{vehicle.vehicle?.occupancyStatus}
+                    バスID:
+                    {matchedBus &&
+                      matchedBus.map((vehicle) => vehicle.vehicle?.vehicle?.id)}
                   </Label>
                 </div>
               );
             })}
+
             {/* データ確認用の表示領域 */}
           </div>
         </SheetHeader>

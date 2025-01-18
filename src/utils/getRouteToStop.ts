@@ -77,6 +77,13 @@ interface Trip {
   start_date: string;
   schedule_relationship: string;
 }
+export const getRoutenameFromRouteId = (
+  routeId: number,
+  routes: GTFSRoute[]
+): string => {
+  const route = routes.find((route) => route.route_id == routeId);
+  return route ? route.route_long_name : "";
+};
 export const getStopTimeFromRouteAndStop = (
   stopId: string,
   stopTimes: GTFSStopTime[],
