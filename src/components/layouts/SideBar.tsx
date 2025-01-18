@@ -269,6 +269,9 @@ export default function SideBar() {
                 ))}
               </select>
             </div>
+            <Label className="block text-white mb-2">
+              出発地からバス停までの距離
+            </Label>
             <Input
               type="number"
               className="text-white"
@@ -312,6 +315,9 @@ export default function SideBar() {
                 ))}
               </select>
             </div>
+            <Label className="block text-white mb-2">
+              目的地からバス停までの距離
+            </Label>
             <Input
               className="text-white"
               type="number"
