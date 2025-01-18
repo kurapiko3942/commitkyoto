@@ -276,6 +276,13 @@ export default function SideBar() {
                     {matchedBus &&
                       matchedBus.map((vehicle) => vehicle.vehicle?.vehicle?.id)}
                   </Label>
+                  <Label className="block text-white mb-2">
+                    混雑度:
+                    {matchedBus &&
+                      matchedBus.map(
+                        (vehicle) => vehicle.vehicle?.occupancyStatus
+                      )}
+                  </Label>
                 </div>
               );
             })}
