@@ -13,6 +13,7 @@ import {
 } from "@/utils/occupancyStatus";
 import { BusStopPopup } from "./BusStopPopup";
 import BusLegend from "./BusLegend";
+import NavigationButton from "./NavigationButton";
 
 // 京都市の中心座標
 const KYOTO_CENTER: LatLngTuple = [35.0116, 135.7681];
@@ -589,6 +590,7 @@ export default function Map() {
 
       {/* "使い方"ボタン */}
       <HowToUseButton />
+      <NavigationButton/>
       {/* 混雑度早見表 */}
     <BusLegend />
     </div>
