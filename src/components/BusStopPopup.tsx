@@ -139,8 +139,8 @@ export const BusStopPopup = ({
   const scheduleInfo = getScheduleInfo();
 
   return (
-    <div className="text-sm max-h-[500px]">
-      <div className="mb-2">
+    <div className="text-sm max-h-[500px] ">
+      <div className="mb-1">
         <h3 className="font-bold text-base">バス停: {stop.stop_name}</h3>
         <p className="text-xs text-gray-600">ID: {stop.stop_id}</p>
       </div>

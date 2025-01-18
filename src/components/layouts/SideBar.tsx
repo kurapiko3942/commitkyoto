@@ -239,7 +239,7 @@ export default function SideBar() {
           variant="outline"
           className="fixed right-4 top-4 z-10 bg-white hover:bg-gray-100"
         >
-          観光地間ルート検索
+          快適ルート検索
         </Button>
       </SheetTrigger>
       <SheetContent
@@ -249,7 +249,7 @@ export default function SideBar() {
       >
         <SheetHeader>
           <SheetTitle className="text-white mt-5">
-            観光地間のルート案内
+            観光地間の快適ルート案内
           </SheetTitle>
 
           {/* 出発地・目的地の選択 */}
