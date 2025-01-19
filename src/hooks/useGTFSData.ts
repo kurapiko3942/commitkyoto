@@ -75,7 +75,7 @@ export function useGTFSData() {
   useEffect(() => {
     const fetchRealtime = async () => {
       try {
-        const response = await fetch("/api/gtfs/realtime, { cache:'no-store' });
+        const response = await fetch("/api/gtfs/realtime", { cache:'no-store' });
         if (!response.ok) {
           throw new Error(`Failed to fetch realtime data: ${response.status}`);
         }
