@@ -18,7 +18,9 @@ export async function GET() {
       );
     }
 
-    const response = await axios.get(realtimeUrl);
+    const response = await axios.get(realtimeUrl, {
+      responseType: "arraybuffer",
+    });
 
     if (response.status !== 200) {
       throw new Error(`HTTP error! status: ${response.status}`);
