@@ -17,7 +17,7 @@ export async function GET() {
       );
     }
 
-    const response = await fetch(realtimeUrl);
+    const response = await fetch(realtimeUrl, { cache:'no-store' });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
