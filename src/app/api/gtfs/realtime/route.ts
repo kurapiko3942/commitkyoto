@@ -1,10 +1,11 @@
 //src/app/api/gtfs/realtime/route.ts
-"use server"
+"use server";
 
 import { NextResponse } from "next/server";
 import * as protobuf from "protobufjs";
 import path from "path";
 import { error } from "console";
+import axios from "axios";
 
 export async function GET() {
   try {
@@ -17,15 +18,15 @@ export async function GET() {
       );
     }
 
-    const response = await fetch(realtimeUrl, { cache:'no-store' });
+    const response = await axios.get(realtimeUrl);
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     // バイナリデータとして取得
-    const buffer = await response.arrayBuffer();
-
+    const buffer = await response.data;
+    console.log(buffer);
     // Protocol Buffers デコード
     const protoPath = path.join(
       process.cwd(),
@@ -54,7 +55,7 @@ export async function GET() {
       return NextResponse.json(decodedData);
     } catch (protoError) {
       if (protoError instanceof Error) {
-        console.log("errorがおきました")
+        console.log("errorがおきました");
       }
       throw protoError;
     }
